@@ -1,3 +1,5 @@
+import random
+
 import sklearn.preprocessing
 
 import sklearn.linear_model
@@ -39,6 +41,8 @@ def read_decoys_file(path):
         # The last line is always a header, so skip it.
         return [line.strip() for line in file.readlines()[:-1]]
 
+def assign_random_alleles(alleles, decoys):
+    return [Sample(allele=random.choice(alleles), peptide=d) for d in decoys]
 
 def read_alleles_file(path):
     with open(path, "r") as file:
@@ -51,23 +55,23 @@ def tag_decoys(alleles, decoys):
 
 class RidgeAlgorithm:
     def train(self, hits, misses):
-        x = [list(s.peptide) for s in hits] + [list(s) for s in misses]
+        x = [list(s.peptide) for s in hits] + [list(s.peptide) for s in misses]
         y = [1] * len(hits) + [0] * len(misses)
 
-        encoder = create_one_hot_encoder(10)
+        encoder = create_one_hot_encoder(9)
         encoder.fit(x)
         encoded_x = encoder.transform(x).toarray()
 
         self.clf = sklearn.linear_model.RidgeClassifier().fit(encoded_x, y)
 
     def eval(self, samples):
-        x = samples
+        x = [list(s.peptide) for s in samples]
 
-        encoder = create_one_hot_encoder(10)
+        encoder = create_one_hot_encoder(9)
         encoder.fit(x)
         encoded_x = encoder.transform(x).toarray()
 
-        return self.predict(x)
+        return self.clf.predict(encoded_x)
 
 
 import random
@@ -84,13 +88,13 @@ def score(algorithm, hits, misses):
     )
     return score
 
+alleles = read_alleles_file("data/alleles_16.txt")
 
-hits = list(read_hits_file("data/hits_16_10.txt"))
-decoys = [s.replace("X", "A") for s in read_decoys_file("data/decoys_10_train.txt")]
+hits = list(read_hits_file("data/hits_16_9.txt"))
+decoys = assign_random_alleles(alleles, [s.replace("X", "A") for s in read_decoys_file("data/decoys_9_train.txt")])
 
 random.shuffle(decoys)
 decoys = decoys[: len(hits)]
-alleles = read_alleles_file("data/alleles_16.txt")
 
 # from functools import reduce
 
