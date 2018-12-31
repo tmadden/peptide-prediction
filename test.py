@@ -26,34 +26,34 @@ class RidgeAlgorithm:
         return self.clf.predict(encoded_x)
 
 
-alleles = peptide.parsing.read_alleles_file("../data/alleles_16.txt")
+import random
 
-hits = list(peptide.parsing.read_hits_file("../data/hits_16_9.txt"))
+
+class PureGuessingAlgorithm:
+    def train(self, hits, misses):
+        pass
+
+    def eval(self, samples):
+        return [random.uniform(0, 1) for _ in samples]
+
+
+alleles = peptide.parsing.read_alleles_file("data/alleles_16.txt")
+hits = list(peptide.parsing.read_hits_file("data/hits_16_9.txt"))
 decoys = peptide.parsing.assign_alleles(
-    alleles, peptide.parsing.read_decoys_file("../data/decoys_9_train.txt")
+    alleles, peptide.parsing.read_decoys_file("data/decoys_9_train.txt")
 )
 
 import random
 
 random.shuffle(decoys)
-decoys = decoys[:40000]
+decoys = decoys[: len(hits)]
 
-print(len(hits))
-print(len(decoys))
+print("{} hits".format(len(hits)))
+print("{} decoys".format(len(decoys)))
 
-peptide.evaluation.evaluate(RidgeAlgorithm, hits, decoys)
+ridge_score = peptide.evaluation.evaluate(RidgeAlgorithm, hits, decoys)
+print("ridge: {:.2f}".format(ridge_score))
 
-# hit_split = len(hits) // 2
-# decoy_split = len(decoys) // 2
+guessing_score = peptide.evaluation.evaluate(PureGuessingAlgorithm, hits, decoys)
+print("guess: {:.2f}".format(guessing_score))
 
-# training_hits = hits[:hit_split]
-# training_decoys = decoys[:decoy_split]
-
-# algorithm = RidgeAlgorithm()
-# algorithm.train(training_hits, training_decoys)
-
-# eval_hits = hits[hit_split:]
-# eval_decoys = decoys[decoy_split:]
-
-# print(peptide.evaluation.score(algorithm, training_hits, training_decoys))
-# print(peptide.evaluation.score(algorithm, eval_hits, eval_decoys))

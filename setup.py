@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(
-    name="peptide",
-    install_requires=["sklearn"],
+    name="peptide-prediction",
+    install_requires=["sklearn", "pytest"],
     packages=[""],
     package_dir={"": "src"},
     py_modules=[],

@@ -46,7 +46,7 @@ def score(algorithm, binders, nonbinders):
     shuffled_samples = [sample for sample, score in paired_samples]
     truth = [score for sample, score in paired_samples]
     predictions = algorithm.eval(shuffled_samples)
-    return score_by_accuracy(truth, predictions)
+    return score_by_top_predictions(truth, predictions)
 
 
 def evaluate(algorithm_class, binders, nonbinders, splits=6):
@@ -58,18 +58,5 @@ def evaluate(algorithm_class, binders, nonbinders, splits=6):
         algorithm = algorithm_class()
         algorithm.train(training_binders, training_nonbinders)
 
-        print(score(algorithm, training_binders, training_nonbinders))
-        print(score(algorithm, eval_binders, eval_nonbinders))
-
-
-# def sort_score(algorithm, hits, misses):
-#     paired_samples = list(zip(hits + misses, [1] * len(hits) + [0] * len(misses)))
-#     random.shuffle(paired_samples)
-#     x = [sample for sample, score in paired_samples]
-#     correct_scores = [score for sample, score in paired_samples]
-#     predicted_scores = algorithm.eval(x)
-#     top_n = len(hits)
-#     top_predictions = numpy.argsort(predicted_scores)[-top_n:]
-#     score = sum([correct_scores[i] for i in top_predictions]) / top_n
-#     return score
-
+        scores.append(score(algorithm, eval_binders, eval_nonbinders))
+    return sum(scores) / len(scores)
