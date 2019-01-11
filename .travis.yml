@@ -4,4 +4,4 @@ python:
 script:
   - python setup.py test
 after_success:
-  - bash <(curl -s https://codecov.io/bash) -f .coverage
+  - bash <(curl -s https://codecov.io/bash)
