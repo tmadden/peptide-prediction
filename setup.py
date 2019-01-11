@@ -1,12 +1,13 @@
 from setuptools import setup
 
 setup(
-    name="peptide-prediction",
-    install_requires=["sklearn", "pytest"],
-    packages=[""],
+    name="peptide",
+    setup_requires=["pytest-runner", "setuptools-git-version"],
+    install_requires=["numpy"],
+    tests_require=["pytest", "scikit-learn>=0.20"],
+    extras_require={"sklearn": ["scikit-learn>=0.20"]}
+    packages=["peptide"],
     package_dir={"": "src"},
-    py_modules=[],
     version="0",
     # version_format="{tag}.dev{commitcount}+{gitsha}",
-    setup_requires=["setuptools-git-version"],
 )

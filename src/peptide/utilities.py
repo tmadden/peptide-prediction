@@ -1,6 +1,3 @@
-import sklearn.preprocessing
-
-
 amino_acids = "ACDEFGHIKLMNPQRSTVWY"
 
 
@@ -18,5 +15,6 @@ def create_one_hot_encoder(length):
 
     :returns: an sklearn.preprocessing.OneHotEncoder
     """
+    import sklearn.preprocessing
 
     return sklearn.preprocessing.OneHotEncoder(categories=[list(amino_acids)] * length)
