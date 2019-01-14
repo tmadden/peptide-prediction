@@ -52,7 +52,7 @@ def score(algorithm, binders, nonbinders):
     truth = [score for sample, score in paired_samples]
     # Ask the algorithm for predictions and score them.
     predictions = algorithm.eval(shuffled_samples)
-    return score_by_top_predictions(truth, predictions)
+    return score_by_accuracy(truth, predictions)
 
 
 def evaluate(algorithm_class, binders, nonbinders, splits=6):
