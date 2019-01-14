@@ -39,17 +39,26 @@ def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
 
 
 def score(algorithm, binders, nonbinders):
+    # Combine the samples and pair them up with their truth values.
     paired_samples = list(
         zip(binders + nonbinders, [1] * len(binders) + [0] * len(nonbinders))
     )
+    # This shuffle may not strictly be necessary, but otherwise the algorithm
+    # would receive samples in a predictable order (with binders followed by
+    # nonbinders).
     random.shuffle(paired_samples)
+    # Now extract the samples and truth values in the shuffled order.
     shuffled_samples = [sample for sample, score in paired_samples]
     truth = [score for sample, score in paired_samples]
+    # Ask the algorithm for predictions and score them.
     predictions = algorithm.eval(shuffled_samples)
     return score_by_top_predictions(truth, predictions)
 
 
 def evaluate(algorithm_class, binders, nonbinders, splits=6):
+    random.shuffle(binders)
+    random.shuffle(nonbinders)
+
     scores = []
     for i in range(splits):
         training_binders, eval_binders = split_array(binders, splits, i)
