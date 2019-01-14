@@ -1,4 +1,4 @@
-from peptide.evaluation import score_by_accuracy, score_by_top_predictions
+from pace.evaluation import score_by_accuracy, score_by_top_predictions
 
 
 def test_ranking_score():

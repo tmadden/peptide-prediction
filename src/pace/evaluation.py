@@ -1,7 +1,7 @@
 import random
 import numpy
 
-from peptide.utilities import split_array
+from pace.utilities import split_array
 
 
 def score_by_top_predictions(truth, predictions, top_n=None):

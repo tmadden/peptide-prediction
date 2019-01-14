@@ -1,4 +1,4 @@
-import peptide.utilities
+import pace.utilities
 
 import random
 
@@ -6,9 +6,9 @@ import numpy
 
 
 def test_one_hot_encoding():
-    encoder = peptide.utilities.create_one_hot_encoder(10)
+    encoder = pace.utilities.create_one_hot_encoder(10)
 
-    x = [random.choices(peptide.utilities.amino_acids, k=10)]
+    x = [random.choices(pace.utilities.amino_acids, k=10)]
 
     encoder.fit(x)
     encoded_x = encoder.transform(x).toarray()
@@ -19,20 +19,8 @@ def test_one_hot_encoding():
 
 def test_split_array():
     array = [1, 0, 2, 0, 3, 4, 0, 5, 0, 6]
-    assert peptide.utilities.split_array(array, 4, 0) == (
-        [1, 0],
-        [2, 0, 3, 4, 0, 5, 0, 6],
-    )
-    assert peptide.utilities.split_array(array, 4, 1) == (
-        [2, 0, 3],
-        [1, 0, 4, 0, 5, 0, 6],
-    )
-    assert peptide.utilities.split_array(array, 4, 2) == (
-        [4, 0],
-        [1, 0, 2, 0, 3, 5, 0, 6],
-    )
-    assert peptide.utilities.split_array(array, 4, 3) == (
-        [5, 0, 6],
-        [1, 0, 2, 0, 3, 4, 0],
-    )
+    assert pace.utilities.split_array(array, 4, 0) == ([1, 0], [2, 0, 3, 4, 0, 5, 0, 6])
+    assert pace.utilities.split_array(array, 4, 1) == ([2, 0, 3], [1, 0, 4, 0, 5, 0, 6])
+    assert pace.utilities.split_array(array, 4, 2) == ([4, 0], [1, 0, 2, 0, 3, 5, 0, 6])
+    assert pace.utilities.split_array(array, 4, 3) == ([5, 0, 6], [1, 0, 2, 0, 3, 4, 0])
 
