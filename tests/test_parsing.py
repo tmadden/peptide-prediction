@@ -3,7 +3,7 @@ from pace.parsing import Sample
 
 
 def test_decoy_parsing():
-    decoys = pace.parsing.read_decoys_file("data/decoys_9_train.txt")
+    decoys = pace.parsing.read_decoys_file("data/decoys_9.txt")
     assert len(decoys) == 999995
     assert decoys[:4] == ["RISLRKVRS", "LNGSKLWIS", "LTMAVLHVT", "LPEGSKDSF"]
 
