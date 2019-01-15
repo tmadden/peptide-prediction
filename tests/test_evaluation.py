@@ -51,7 +51,8 @@ def test_evaluation():
         def predict(self, samples):
             return [1] * len(samples)
 
-    assert evaluate(BlindlyOptimisticAlgorithm, binders, nonbinders) == 0.5
+    boa_scores = evaluate(BlindlyOptimisticAlgorithm, binders, nonbinders)
+    assert numpy.mean(boa_scores['by_accuracy']) == 0.5
 
     # This algorithm thinks that any peptide longer than 1 character binds.
     # It's right two thirds of the time.
@@ -62,4 +63,5 @@ def test_evaluation():
         def predict(self, samples):
             return [1 if len(s.peptide) > 1 else 0 for s in samples]
 
-    assert evaluate(LengthBasedAlgorithm, binders, nonbinders) == 2 / 3
+    lba_scores = evaluate(LengthBasedAlgorithm, binders, nonbinders)
+    assert numpy.mean(lba_scores['by_accuracy']) == 2 / 3

@@ -42,7 +42,7 @@ def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
         1 - binder_weight)
 
 
-def score(algorithm, binders, nonbinders):
+def score(algorithm, binders, nonbinders, scorers):
     # Combine the samples and pair them up with their truth values.
     paired_samples = list(
         zip(binders + nonbinders, [1] * len(binders) + [0] * len(nonbinders)))
@@ -55,14 +55,25 @@ def score(algorithm, binders, nonbinders):
     truth = [score for sample, score in paired_samples]
     # Ask the algorithm for predictions and score them.
     predictions = algorithm.predict(shuffled_samples)
-    return score_by_accuracy(truth, predictions)
+    return {label: f(truth, predictions) for label, f in scorers.items()}
 
 
-def evaluate(algorithm_class, binders, nonbinders, splits=6):
+default_scorers = {
+    'by_top_predictions': score_by_top_predictions,
+    'by_accuracy': score_by_accuracy
+}
+
+
+def evaluate(algorithm_class,
+             binders,
+             nonbinders,
+             scorers=default_scorers,
+             splits=6):
+    # Shuffle both sample lists so that splits are random.
     random.shuffle(binders)
     random.shuffle(nonbinders)
 
-    scores = []
+    scores = {label: [] for label in scorers}
     for i in range(splits):
         training_binders, eval_binders = split_array(binders, splits, i)
         training_nonbinders, eval_nonbinders = split_array(
@@ -71,5 +82,8 @@ def evaluate(algorithm_class, binders, nonbinders, splits=6):
         algorithm = algorithm_class()
         algorithm.train(training_binders, training_nonbinders)
 
-        scores.append(score(algorithm, eval_binders, eval_nonbinders))
-    return sum(scores) / len(scores)
+        new_scores = score(algorithm, eval_binders, eval_nonbinders, scorers)
+        for label in scorers.keys():
+            scores[label].append(new_scores[label])
+
+    return scores
