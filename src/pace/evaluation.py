@@ -29,20 +29,23 @@ def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
 
     :param binder_weight: the fraction that the binder score contributes to the overall score - The prediction accuracy for binders and nonbinders is considered separately and then combined according to this weight.
     """
-    correctness = [(t > cutoff) == (p > cutoff) for (t, p) in zip(truth, predictions)]
+    correctness = [(t > cutoff) == (p > cutoff)
+                   for (t, p) in zip(truth, predictions)]
 
     def score_for_truth(truth_value):
-        filtered = [c for (c, t) in zip(correctness, truth) if t == truth_value]
+        filtered = [
+            c for (c, t) in zip(correctness, truth) if t == truth_value
+        ]
         return sum(1 for c in filtered if c) / len(filtered)
 
-    return score_for_truth(1) * binder_weight + score_for_truth(0) * (1 - binder_weight)
+    return score_for_truth(1) * binder_weight + score_for_truth(0) * (
+        1 - binder_weight)
 
 
 def score(algorithm, binders, nonbinders):
     # Combine the samples and pair them up with their truth values.
     paired_samples = list(
-        zip(binders + nonbinders, [1] * len(binders) + [0] * len(nonbinders))
-    )
+        zip(binders + nonbinders, [1] * len(binders) + [0] * len(nonbinders)))
     # This shuffle may not strictly be necessary, but otherwise the algorithm
     # would receive samples in a predictable order (with binders followed by
     # nonbinders).
@@ -51,7 +54,7 @@ def score(algorithm, binders, nonbinders):
     shuffled_samples = [sample for sample, score in paired_samples]
     truth = [score for sample, score in paired_samples]
     # Ask the algorithm for predictions and score them.
-    predictions = algorithm.eval(shuffled_samples)
+    predictions = algorithm.predict(shuffled_samples)
     return score_by_accuracy(truth, predictions)
 
 
@@ -62,7 +65,8 @@ def evaluate(algorithm_class, binders, nonbinders, splits=6):
     scores = []
     for i in range(splits):
         training_binders, eval_binders = split_array(binders, splits, i)
-        training_nonbinders, eval_nonbinders = split_array(nonbinders, splits, i)
+        training_nonbinders, eval_nonbinders = split_array(
+            nonbinders, splits, i)
 
         algorithm = algorithm_class()
         algorithm.train(training_binders, training_nonbinders)

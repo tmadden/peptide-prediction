@@ -1,5 +1,5 @@
 import pace.parsing
-from pace.parsing import Sample
+from pace import Sample
 
 
 def test_decoy_parsing():

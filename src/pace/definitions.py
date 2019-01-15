@@ -1,4 +1,10 @@
 from abc import ABC, abstractmethod
+from typing import NamedTuple
+
+
+class Sample(NamedTuple):
+    allele: str
+    peptide: str
 
 
 class PredictionAlgorithm(ABC):

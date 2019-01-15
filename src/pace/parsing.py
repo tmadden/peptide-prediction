@@ -1,14 +1,7 @@
 import pace.utilities
+from pace.definitions import Sample
 
 import itertools
-
-
-from typing import NamedTuple
-
-
-class Sample(NamedTuple):
-    allele: str
-    peptide: str
 
 
 def read_hits_file(path):
@@ -30,7 +23,8 @@ def read_decoys_file(path):
 def assign_alleles(alleles, decoys):
 
     return [
-        Sample(allele=a, peptide=d) for a, d in zip(itertools.cycle(alleles), decoys)
+        Sample(allele=a, peptide=d)
+        for a, d in zip(itertools.cycle(alleles), decoys)
     ]
 
 

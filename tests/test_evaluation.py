@@ -1,6 +1,6 @@
-from pace.evaluation import score_by_accuracy, score_by_top_predictions, evaluate
-from pace.parsing import Sample
 import numpy
+import pace
+from pace.evaluation import score_by_accuracy, score_by_top_predictions, evaluate
 
 
 def test_ranking_score():
@@ -25,42 +25,41 @@ def test_accuracy_score():
 
 def test_evaluation():
     binders = [
-        Sample(allele="A", peptide="AA"),
-        Sample(allele="A", peptide="BB"),
-        Sample(allele="A", peptide="CC"),
-        Sample(allele="A", peptide="DD"),
-        Sample(allele="A", peptide="E"),
-        Sample(allele="A", peptide="F"),
+        pace.Sample(allele="A", peptide="AA"),
+        pace.Sample(allele="A", peptide="BB"),
+        pace.Sample(allele="A", peptide="CC"),
+        pace.Sample(allele="A", peptide="DD"),
+        pace.Sample(allele="A", peptide="E"),
+        pace.Sample(allele="A", peptide="F"),
     ]
 
     nonbinders = [
-        Sample(allele="A", peptide="GG"),
-        Sample(allele="A", peptide="HH"),
-        Sample(allele="A", peptide="I"),
-        Sample(allele="A", peptide="J"),
-        Sample(allele="A", peptide="K"),
-        Sample(allele="A", peptide="L"),
+        pace.Sample(allele="A", peptide="GG"),
+        pace.Sample(allele="A", peptide="HH"),
+        pace.Sample(allele="A", peptide="I"),
+        pace.Sample(allele="A", peptide="J"),
+        pace.Sample(allele="A", peptide="K"),
+        pace.Sample(allele="A", peptide="L"),
     ]
 
     # This algorithm thinks everything binds.
     # It's right half the time.
-    class BlindlyOptimisticAlgorithm:
+    class BlindlyOptimisticAlgorithm(pace.PredictionAlgorithm):
         def train(self, hits, misses):
             pass
 
-        def eval(self, samples):
+        def predict(self, samples):
             return [1] * len(samples)
 
     assert evaluate(BlindlyOptimisticAlgorithm, binders, nonbinders) == 0.5
 
     # This algorithm thinks that any peptide longer than 1 character binds.
     # It's right two thirds of the time.
-    class LengthBasedAlgorithm:
+    class LengthBasedAlgorithm(pace.PredictionAlgorithm):
         def train(self, hits, misses):
             pass
 
-        def eval(self, samples):
+        def predict(self, samples):
             return [1 if len(s.peptide) > 1 else 0 for s in samples]
 
     assert evaluate(LengthBasedAlgorithm, binders, nonbinders) == 2 / 3
-
