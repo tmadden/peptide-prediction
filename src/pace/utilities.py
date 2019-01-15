@@ -17,4 +17,5 @@ def create_one_hot_encoder(length):
     """
     import sklearn.preprocessing
 
-    return sklearn.preprocessing.OneHotEncoder(categories=[list(amino_acids)] * length)
+    return sklearn.preprocessing.OneHotEncoder(
+        categories=[list(amino_acids)] * length)

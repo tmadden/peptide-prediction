@@ -14,7 +14,10 @@ def test_one_hot_encoding():
     encoded_x = encoder.transform(x).toarray()
 
     assert encoded_x.shape == (1, 200)
-    assert dict(zip(*numpy.unique(encoded_x, return_counts=True))) == {0: 190, 1: 10}
+    assert dict(zip(*numpy.unique(encoded_x, return_counts=True))) == {
+        0: 190,
+        1: 10
+    }
 
 
 def test_split_array():
