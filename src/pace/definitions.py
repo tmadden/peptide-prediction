@@ -16,7 +16,7 @@ class PredictionAlgorithm(ABC):
         :param binders: samples that are known to bind
         :param nonbinders: samples that are known to not bind
         """
-        pass
+        pass  # pragma: no cover
 
     @abstractmethod
     def predict(self, samples):
@@ -27,4 +27,4 @@ class PredictionAlgorithm(ABC):
 
         :returns: an array-like value containing a prediction for each sample - Each prediction is a number between 0 and 1 indicating how likely the sample is to bind.
         """
-        pass
+        pass  # pragma: no cover
