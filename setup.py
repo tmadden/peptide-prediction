@@ -9,6 +9,9 @@ setup(
     extras_require={"sklearn": ["scikit-learn>=0.20"]},
     packages=["pace"],
     package_dir={"": "src"},
+    package_data={
+        'pace': ['data/*.txt'],
+    },
     version="0",
     # version_format="{tag}.dev{commitcount}+{gitsha}",
 )
