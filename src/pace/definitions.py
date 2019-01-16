@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import NamedTuple
 
+amino_acids = "ACDEFGHIKLMNPQRSTVWY"
+
 
 class Sample(NamedTuple):
     allele: str
