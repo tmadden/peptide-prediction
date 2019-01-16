@@ -4,7 +4,7 @@ import pprint
 
 
 class PureGuessingAlgorithm(pace.PredictionAlgorithm):
-    def train(self, hits, misses):
+    def train(self, binders, nonbinders):
         pass
 
     def predict(self, samples):
