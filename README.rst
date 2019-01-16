@@ -1,4 +1,4 @@
-pace
+PACE
 ====
 
 .. image:: https://img.shields.io/travis/tmadden/pace.svg?style=flat&logo=travis
