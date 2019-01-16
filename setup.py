@@ -12,6 +12,5 @@ setup(
     package_data={
         'pace': ['data/*.txt'],
     },
-    version="0",
-    # version_format="{tag}.dev{commitcount}+{gitsha}",
+    version_format="{tag}.dev{commitcount}+{gitsha}",
 )
