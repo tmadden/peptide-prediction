@@ -1,9 +1,9 @@
 import numpy
 import pace
-from pace.evaluation import score_by_accuracy, score_by_top_predictions, evaluate
 
 
 def test_ranking_score():
+    from pace.evaluation import score_by_top_predictions
     t = [1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0]
     p = [0.7, 0.4, 0.3, 0.6, 0.8, 0.9, 0.4, 1.0]
     assert score_by_top_predictions(t, p) == 0.5
@@ -14,6 +14,7 @@ def test_ranking_score():
 
 
 def test_accuracy_score():
+    from pace.evaluation import score_by_accuracy
     t = [1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0]
     p = [0.6, 0.3, 0.3, 0.4, 0.0, 0.0, 0.4, 0.7]
     assert score_by_accuracy(t, p) == 0.75
@@ -23,7 +24,18 @@ def test_accuracy_score():
     assert score_by_accuracy(t, p, binder_weight=0) == 1
 
 
+def test_split_array():
+    from pace.evaluation import split_array
+    array = [1, 0, 2, 0, 3, 4, 0, 5, 0, 6]
+    assert split_array(array, 4, 0) == ([1, 0], [2, 0, 3, 4, 0, 5, 0, 6])
+    assert split_array(array, 4, 1) == ([2, 0, 3], [1, 0, 4, 0, 5, 0, 6])
+    assert split_array(array, 4, 2) == ([4, 0], [1, 0, 2, 0, 3, 5, 0, 6])
+    assert split_array(array, 4, 3) == ([5, 0, 6], [1, 0, 2, 0, 3, 4, 0])
+
+
 def test_evaluation():
+    from pace.evaluation import evaluate
+
     binders = [
         pace.Sample(allele="A", peptide="AA"),
         pace.Sample(allele="A", peptide="BB"),

@@ -1,8 +1,6 @@
 import random
 import numpy
 
-from pace.utilities import split_array
-
 
 def score_by_top_predictions(truth, predictions, top_n=None):
     """
@@ -40,6 +38,12 @@ def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
 
     return score_for_truth(1) * binder_weight + score_for_truth(0) * (
         1 - binder_weight)
+
+
+def split_array(array, total_splits, split_index):
+    start = len(array) * split_index // total_splits
+    end = len(array) * (split_index + 1) // total_splits
+    return (array[start:end], array[:start] + array[end:])
 
 
 def score(algorithm, binders, nonbinders, scorers):
