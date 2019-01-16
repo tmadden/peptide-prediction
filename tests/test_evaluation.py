@@ -33,7 +33,7 @@ def test_split_array():
     assert split_array(array, 4, 3) == ([5, 0, 6], [1, 0, 2, 0, 3, 4, 0])
 
 
-def test_evaluation():
+def test_simple_evaluation():
     from pace.evaluation import evaluate
 
     binders = [
@@ -57,7 +57,7 @@ def test_evaluation():
     # This algorithm thinks everything binds.
     # It's right half the time.
     class BlindlyOptimisticAlgorithm(pace.PredictionAlgorithm):
-        def train(self, hits, misses):
+        def train(self, binders, nonbinders):
             pass
 
         def predict(self, samples):
@@ -69,7 +69,7 @@ def test_evaluation():
     # This algorithm thinks that any peptide longer than 1 character binds.
     # It's right two thirds of the time.
     class LengthBasedAlgorithm(pace.PredictionAlgorithm):
-        def train(self, hits, misses):
+        def train(self, binders, nonbinders):
             pass
 
         def predict(self, samples):
@@ -77,3 +77,21 @@ def test_evaluation():
 
     lba_scores = evaluate(LengthBasedAlgorithm, binders, nonbinders)
     assert numpy.mean(lba_scores['by_accuracy']) == 2 / 3
+
+
+def test_evaluation_splitting():
+    # This tests that the evaluation algorithm isn't sending in samples that
+    # were used to train.
+
+    class TestAlgorithm(pace.PredictionAlgorithm):
+        def train(self, binders, nonbinders):
+            self.binders = binders
+            self.nonbinders = nonbinders
+
+        def predict(self, samples):
+            for s in samples:
+                assert s not in self.binders
+                assert s not in self.nonbinders
+            return [1] * len(samples)
+
+    pace.evaluate(TestAlgorithm, **pace.load_data_set(16, peptide_lengths=[9]))

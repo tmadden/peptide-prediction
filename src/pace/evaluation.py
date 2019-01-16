@@ -79,14 +79,17 @@ def evaluate(algorithm_class,
 
     scores = {label: [] for label in scorers}
     for i in range(splits):
-        training_binders, eval_binders = split_array(binders, splits, i)
-        training_nonbinders, eval_nonbinders = split_array(
+        # Split the data.
+        training_binders, test_binders = split_array(binders, splits, i)
+        training_nonbinders, test_nonbinders = split_array(
             nonbinders, splits, i)
 
+        # Create a fresh algorithm instance and train it.
         algorithm = algorithm_class()
         algorithm.train(training_binders, training_nonbinders)
 
-        new_scores = score(algorithm, eval_binders, eval_nonbinders, scorers)
+        # Do the scoring and record the scores.
+        new_scores = score(algorithm, test_binders, test_nonbinders, scorers)
         for label in scorers.keys():
             scores[label].append(new_scores[label])
 
