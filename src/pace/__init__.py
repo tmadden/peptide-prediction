@@ -5,3 +5,4 @@ __version__ = _pgk_resources.require("pace")[0].version
 # Import the package-level API.
 from .evaluation import evaluate
 from .definitions import *
+from .data import load_data_set
