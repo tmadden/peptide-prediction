@@ -7,7 +7,7 @@ from pkg_resources import resource_stream
 def test_decoy_parsing():
     decoys = pace.data.read_decoys_file(
         resource_stream("pace", "data/decoys_9.txt"))
-    assert len(decoys) == 999995
+    assert len(decoys) == 982791
     assert decoys[:4] == ["RISLRKVRS", "LNGSKLWIS", "LTMAVLHVT", "LPEGSKDSF"]
 
 
