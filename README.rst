@@ -9,9 +9,11 @@ pace
 
 |
 
-Welcome to PACE, a framework for comparing machine learning algorithms for the peptide-MHC binding problem. While many methods have been published, a shared dataset and evaluation protocol have been missing, making it impossible to compare the various approaches. PACE (peptide algorithm comparison environment) fills that void by supplying a 95 HLA allele dataset and a structured comparison protocol such that algorithms can be fairly compared.
+Welcome to PACE, a framework for comparing machine learning algorithms for the peptide-MHC binding problem. While many potential solutions to this problem have been published, a shared dataset and evaluation protocol have been missing, making it impossible to compare the various approaches. PACE (peptide algorithm comparison environment) fills that void by supplying a 95 HLA allele dataset and a structured evaluation protocol such that algorithms can be fairly compared.
 
-Users are encouraged to implement their own methods in the PACE framework.
+As a secondary goal, PACE aims to provide useful utilities to facilitate the development of prediction algorithms, such as characteristics for alleles, utilities for implementing algorithms on common machine learning frameworks, etc.
+
+Contributions are welcome. We will publish contribution guidelines shortly...
 
 Installation
 ------------
@@ -22,7 +24,7 @@ PACE requires Python 3.6 or higher. It can be installed using pip directly from 
 
    pip install git+https://github.com/tmadden/pace.git#egg=pace
 
-This will get you the core evaluation mechanisms and datasets. If you want optional components for interfacing with other libraries, you'll need to specify that explicitly. For example:
+This will get you the core evaluation mechanics and datasets. If you want optional components for interfacing with other libraries, you'll need to specify that explicitly. For example:
 
 ::
 
@@ -44,7 +46,7 @@ A trivial example is below. This algorithm skips the training phase and simply p
         def predict(self, samples):
             return [1 if s.allele[0] == s.peptide[0] else 0 for s in samples]
 
-
+    # Evaluate our algorithm using PACE.
     scores = pace.evaluate(PureGuessingAlgorithm,
                            **pace.load_data_set(16, nonbinder_fraction=0.9))
     pprint.pprint(scores)
