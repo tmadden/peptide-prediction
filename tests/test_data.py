@@ -44,3 +44,18 @@ def test_allele_assignment():
         Sample(allele="C", peptide="Y"),
         Sample(allele="A", peptide="Z"),
     ]
+
+
+def test_data_set():
+    data_set = pace.data.load_data_set(
+        16, peptide_lengths=[9, 10], nonbinder_fraction=0.75)
+
+    binders = data_set["binders"]
+    nonbinders = data_set["nonbinders"]
+    all_samples = binders + nonbinders
+
+    assert len(nonbinders) == len(binders) * 3
+
+    assert all(len(s.peptide) in (9, 10) for s in all_samples)
+
+    assert len(set(s.allele for s in all_samples)) == 16
