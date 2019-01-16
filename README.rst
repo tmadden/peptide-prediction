@@ -47,7 +47,7 @@ A trivial example is below. This algorithm skips the training phase and simply p
             return [1 if s.allele[0] == s.peptide[0] else 0 for s in samples]
 
     # Evaluate our algorithm using PACE.
-    scores = pace.evaluate(PureGuessingAlgorithm,
+    scores = pace.evaluate(FairlyPoorAlgorithm,
                            **pace.load_data_set(16, nonbinder_fraction=0.9))
     pprint.pprint(scores)
 
