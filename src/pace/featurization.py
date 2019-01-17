@@ -11,12 +11,4 @@ def do_FMLN_encoding(peplist, m=8, n=3):
     :returns: encoded peptide list
     """
     
-    
-    # e = []
-    # for p in peplist:
-    #     fmln = p[0:m] + p[-n:]
-    #     e.append(fmln)
-
-    # return e
-    
     return [p[0:m] + p[-n:] for p in peplist]
