@@ -4,3 +4,4 @@ coverage:
     project:
       default:
         target: 100%
+comment: off
