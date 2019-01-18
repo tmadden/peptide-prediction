@@ -94,17 +94,3 @@ def evaluate(algorithm_class,
             scores[label].append(new_scores[label])
 
     return scores
-
-
-def untested_evaluate(algorithm_class,
-                      binders,
-                      nonbinders,
-                      scorers=default_scorers,
-                      splits=6):
-    # Shuffle both sample lists so that splits are random.
-    random.shuffle(binders)
-    random.shuffle(nonbinders)
-
-    scores = {label: [] for label in scorers}
-
-    return scores
