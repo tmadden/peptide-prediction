@@ -85,6 +85,8 @@ def evaluate(algorithm_class,
             nonbinders, splits, i)
 
         # Create a fresh algorithm instance and train it.
+        # tom, maybe this "create fresh instance" should go outside loop
+        # things like building the architecture for a neural network only need to get done once...
         algorithm = algorithm_class()
         algorithm.train(training_binders, training_nonbinders)
 
