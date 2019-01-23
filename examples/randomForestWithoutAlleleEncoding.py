@@ -14,8 +14,8 @@ h2o.remove_all()  # clean slate, in case cluster was already running
 
 class RandomForesth2oWithoutAlleles(pace.PredictionAlgorithm):
 
-    def __init__(self):
-        self.numTrees = 50
+    def __init__(self, nt):
+        self.numTrees = nt
 
     def train(self, hits, misses):
         x = [list(s.peptide) for s in hits] + [list(s.peptide) for s in misses]
@@ -59,10 +59,21 @@ class RandomForesth2oWithoutAlleles(pace.PredictionAlgorithm):
         predylist = pred.as_data_frame().as_matrix().flatten().tolist()
         return predylist
 
-# jsut a subset of the lengths:
+# just a subset of the lengths:
 p = [9]
 # or all:
 # p = [8, 9, 10, 11]
-scores = pace.evaluate(RandomForesth2oWithoutAlleles,
+
+#def f():
+#    rf = RandomForesth2oWithoutAlleles(55)
+#    return rf
+
+# instead do it with a lambda:
+# flam is a function which takes no arguments and returns a
+# RandomForesth2oWithoutAlleles object with the specified number of trees.
+
+flam = lambda : RandomForesth2oWithoutAlleles(55)
+
+scores = pace.evaluate(flam,
                        **pace.load_data_set(16, peptide_lengths=p))
 pprint.pprint(scores)
