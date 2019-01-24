@@ -1,3 +1,5 @@
+import numpy as np
+
 def do_FMLN_encoding(peplist, m=8, n=3):
     """
     First m last n. e.g. for FELT encoding, the default, m=8, n=3
@@ -206,4 +208,89 @@ def get_snpSets(allele_set_number):
         raise Exception(
             'in get_snpSets, expecting 16 or 95, got {}'.format(allele_set_number))
     return rval   
-        
+
+
+# allele sets are used for building machine learning algorithms that aggregate data across "close" alleles
+# should ultimately put in the code which goes from the hla7d and forms (possibly overlapping) allele clusters
+# but for now I've done this in matlab: computeHLAdistanceMatrix.m
+allele_sets_16 = [[0, 1, 2, 3, 4, 9],
+                  [0, 5, 7, 8, 9],
+                  [0, 6, 9],
+                  [11, 12, 13, 14, 15],
+                  [10, 13, 14, 15]]
+               
+a16_names = ['A0101', 'A0201', 'A0203', 'A0204', 'A0207', 'A0301', 'A2402', 'A2902', 'A3101', 'A6802',
+             'B3501', 'B4402', 'B4403', 'B5101', 'B5401', 'B5701']
+
+
+allele_sets_95 = [[34, 35, 41, 43, 47, 48, 49, 54, 55, 56, 58, 60, 61, 62, 67, 68, 69, 70],
+                  [0, 12, 13, 14, 15, 21, 92, 93, 94],
+                  [0, 1, 2, 3, 4, 5, 6, 7, 8, 28, 29],
+                  [0, 9, 10, 11, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+                  [31, 32, 33, 36, 37, 38, 39, 40, 42, 44, 45, 46, 51, 52, 53, 56, 59, 63, 64, 65, 66],
+                  [31, 32, 33, 36, 37, 38, 39, 40, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 56, 59, 63, 64, 65],
+                  [57, 71, 72, 73, 74, 75, 76, 77, 78, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91],
+                  [71, 72, 74, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 90, 91]]
+
+a95_names = ['A0101', 'A0201', 'A0202', 'A0203', 'A0204', 'A0205', 'A0206', 'A0207', 'A0211', 'A0301', 
+             'A1101', 'A1102', 'A2301', 'A2402', 'A2407', 'A2501', 'A2601', 'A2902', 'A3001', 'A3002', 
+             'A3101', 'A3201', 'A3301', 'A3303', 'A3401', 'A3402', 'A3601', 'A6601', 'A6801', 'A6802', 
+             'A7401', 'B0702', 'B0704', 'B0801', 'B1301', 'B1302', 'B1402', 'B1501', 'B1502', 'B1503', 
+             'B1510', 'B1517', 'B1801', 'B2705', 'B3501', 'B3503', 'B3507', 'B3701', 'B3801', 'B3802', 
+             'B4001', 'B4002', 'B4006', 'B4201', 'B4402', 'B4403', 'B4501', 'B4601', 'B4901', 'B5001', 
+             'B5101', 'B5201', 'B5301', 'B5401', 'B5501', 'B5502', 'B5601', 'B5701', 'B5703', 'B5801', 
+             'B5802', 'C0102', 'C0202', 'C0302', 'C0303', 'C0304', 'C0401', 'C0403', 'C0501', 'C0602', 
+             'C0701', 'C0702', 'C0704', 'C0801', 'C0802', 'C1202', 'C1203', 'C1402', 'C1403', 'C1502', 
+             'C1601', 'C1701', 'G0101', 'G0103', 'G0104']
+
+def get_allele_sets(allele_set_number):
+    rsets = None
+    rnames = None
+    if allele_set_number == 16:
+        rsets = allele_sets_16
+        rnames = a16_names
+    elif allele_set_number == 95:
+        rsets = allele_sets_95
+        rnames = a95_names
+    else:
+        raise Exception(
+            'in get_allele_sets, expecting 16 or 95, got {}'.format(allele_set_number))
+    return rsets, rnames
+
+
+def split_into_sets(xydata, xa, classmembers, canames):
+    """
+
+    :param xydata: this is the machine learning ready data, as a numpy array where last column is y data to predict
+    :param xa: allele names that go along with the xydata
+    :return: the xydata split into subsets (possibly overlapping, i.e. rows can go into more than one set)
+    """
+
+    # replace allele names with unique integers [where they are in a16_names, or a95_names : called canames in general]:
+    xai = []
+    for i in range(len(xa)):
+        xai.append(canames.index(xa[i]))
+
+    # return will be a list of numpy arrays, which are the xydata with only the correct rows.
+    xysets = []
+    forestmembers = []
+    # now step through and form 5 (8 if 95 allele dataset) subsets
+    for i in range(len(classmembers)):
+        # select all the rows for these classmembers
+        myi = np.where(np.in1d(xai, classmembers[i]))
+        # xysets.append(xydata[tuple(myi),:])
+        # try it without the ,:. i think that's adding an unneeded dimension to the array
+        # only save if we found some samples that are in this set:
+        if len(myi[0]) > 0:
+            xysets.append(xydata[tuple(myi)])
+            forestmembers.append(classmembers[i])
+    return xysets, forestmembers
+
+def get_all_sets_for_allele(aname, forestmembers, canames):
+    # print(aname)
+    anum = canames.index(aname)
+    useforest = []
+    for i in range(len(forestmembers)):
+        if anum in forestmembers[i]:
+            useforest.append(i)
+    return useforest
