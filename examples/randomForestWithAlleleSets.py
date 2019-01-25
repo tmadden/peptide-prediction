@@ -70,7 +70,7 @@ class RandomForestWithAlleleSets(pace.PredictionAlgorithm):
 
         # step through these alleles
 
-        for i, aname in enumerate(ua):
+        for aname in ua:
             print('working on allele '+aname)
             # get which forests to use for this allele [allele aname]
             # DEBUG here i could have this return a list of forests, instead of indices, directly.

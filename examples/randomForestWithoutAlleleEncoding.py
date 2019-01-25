@@ -64,16 +64,6 @@ p = [9]
 # or all:
 # p = [8, 9, 10, 11]
 
-#def f():
-#    rf = RandomForesth2oWithoutAlleles(55)
-#    return rf
-
-# instead do it with a lambda:
-# flam is a function which takes no arguments and returns a
-# RandomForesth2oWithoutAlleles object with the specified number of trees.
-
-flam = lambda : RandomForesth2oWithoutAlleles(55)
-
-scores = pace.evaluate(flam,
+scores = pace.evaluate(lambda : RandomForesth2oWithoutAlleles(55),
                        **pace.load_data_set(16, peptide_lengths=p))
 pprint.pprint(scores)

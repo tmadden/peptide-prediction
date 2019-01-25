@@ -283,7 +283,6 @@ class FanMergeAlgorithm(pace.PredictionAlgorithm):
         return d, indStart, indEnd
 
            
-
 scores = pace.evaluate(FanMergeAlgorithm,
                     **pace.load_data_set(16, peptide_lengths=[8, 9, 10, 11]))
 pprint.pprint(scores)
