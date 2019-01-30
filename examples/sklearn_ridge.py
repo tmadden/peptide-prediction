@@ -1,4 +1,4 @@
-import pace, pace.sklearn
+import pace, pace.sklearn, pace.featurization
 import sklearn.linear_model
 import pprint
 
@@ -9,7 +9,9 @@ class RidgeAlgorithm(pace.PredictionAlgorithm):
              for s in binders] + [list(s.peptide) for s in nonbinders]
         y = [1] * len(binders) + [0] * len(nonbinders)
 
-        encoder = pace.sklearn.create_one_hot_encoder(9)
+        x = pace.featurization.do_FMLN_encoding(x,m=6,n=5)
+
+        encoder = pace.sklearn.create_one_hot_encoder(len(x[0]))
         encoder.fit(x)
         encoded_x = encoder.transform(x).toarray()
 
@@ -18,7 +20,9 @@ class RidgeAlgorithm(pace.PredictionAlgorithm):
     def predict(self, samples):
         x = [list(s.peptide) for s in samples]
 
-        encoder = pace.sklearn.create_one_hot_encoder(9)
+        x = pace.featurization.do_FMLN_encoding(x,m=6,n=5)
+
+        encoder = pace.sklearn.create_one_hot_encoder(len(x[0]))
         encoder.fit(x)
         encoded_x = encoder.transform(x).toarray()
 
@@ -26,5 +30,5 @@ class RidgeAlgorithm(pace.PredictionAlgorithm):
 
 
 scores = pace.evaluate(RidgeAlgorithm,
-                       **pace.load_data_set(16, peptide_lengths=[9]))
+                       **pace.load_data_set(16, peptide_lengths=[8,9,10,11]))
 pprint.pprint(scores)

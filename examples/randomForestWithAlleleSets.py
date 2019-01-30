@@ -13,9 +13,10 @@ h2o.remove_all()  # clean slate, in case cluster was already running
 
 class RandomForestWithAlleleSets(pace.PredictionAlgorithm):
 
-    def __init__(self):
-        self.allele_set_size = 16
-        self.classmembers, self.canames = pace.featurization.get_allele_sets(self.allele_set_size)
+    def __init__(self, numTrees, whichAlleleSet):
+        self.numTrees = numTrees
+        self.whichAlleleSet = whichAlleleSet
+        self.classmembers, self.canames = pace.featurization.get_allele_sets(whichAlleleSet)
 
 
     def train(self, hits, misses):
@@ -50,7 +51,7 @@ class RandomForestWithAlleleSets(pace.PredictionAlgorithm):
         # train all the separate models:
 
         for i, df in enumerate(frame_list):
-            rfmod = H2ORandomForestEstimator(model_id='model' + str(i), ntrees=50)
+            rfmod = H2ORandomForestEstimator(model_id='model' + str(i), ntrees=self.numTrees)
             rfmod.train(x=all_features, y=binder_y, training_frame=df)
             self.clf.append(rfmod)
 
@@ -96,6 +97,8 @@ class RandomForestWithAlleleSets(pace.PredictionAlgorithm):
 
         return predylist
 
-scores = pace.evaluate(RandomForestWithAlleleSets,
-                       **pace.load_data_set(16, peptide_lengths=[8, 9, 10, 11]))
+whichAlleleSet = 16
+
+scores = pace.evaluate(lambda : RandomForestWithAlleleSets(20, whichAlleleSet),
+                       **pace.load_data_set(whichAlleleSet, peptide_lengths=[8, 9, 10, 11]))
 pprint.pprint(scores)
