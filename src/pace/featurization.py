@@ -260,10 +260,18 @@ def get_allele_sets(allele_set_number):
 
 def split_into_sets(xydata, xa, classmembers, canames):
     """
+    Partitions a full dataset into subsets based on given allele sets (called classmembers).
 
     :param xydata: this is the machine learning ready data, as a numpy array where last column is y data to predict
+    
     :param xa: allele names that go along with the xydata
+
+    :param classmembers: a list of lists. classmembers[0] is the list of allele integer identifiers that constitute the first (0th) allele set
+    
+    :param canames: these are the allele names, the indexing of this list corresponds to the allele integer identifier (could have also used a dictionary)
+
     :return: the xydata split into subsets (possibly overlapping, i.e. rows can go into more than one set)
+             and, for each set, the allele list (classmembers) corresponding to it.
     """
 
     # replace allele names with unique integers [where they are in a16_names, or a95_names : called canames in general]:
@@ -279,15 +287,25 @@ def split_into_sets(xydata, xa, classmembers, canames):
         # select all the rows for these classmembers
         myi = np.where(np.in1d(xai, classmembers[i]))
         # xysets.append(xydata[tuple(myi),:])
-        # try it without the ,:. i think that's adding an unneeded dimension to the array
-        # only save if we found some samples that are in this set:
+        # save if we found some samples that are in this set:
         if len(myi[0]) > 0:
             xysets.append(xydata[tuple(myi)])
             forestmembers.append(classmembers[i])
     return xysets, forestmembers
 
 def get_all_sets_for_allele(aname, forestmembers, canames):
-    # print(aname)
+    """
+    Find the sets that a partiocular allele belongs to.
+
+    :param aname: the allele name    
+ 
+    :param forestmembers: list of lists. forestmembers[0] is the first allele set, etc.
+  
+    :param canames: these are the allele names, the indexing of this list corresponds to forestmembers (integers)
+
+    :return: list of forests to use for the particular allele
+    """
+
     anum = canames.index(aname)
     useforest = []
     for i in range(len(forestmembers)):
