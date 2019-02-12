@@ -17,7 +17,9 @@ class RandomForestWithAlleleSets(pace.PredictionAlgorithm):
         self.numTrees = numTrees
         self.whichAlleleSet = whichAlleleSet
         self.classmembers, self.canames = pace.featurization.get_allele_sets(whichAlleleSet)
-
+        # with current params, soft_clustering is the best of the following two:
+        # self.classmembers, self.canames = pace.featurization.build_allele_sets_soft_clustering(whichAlleleSet,5,0.1,'all')
+        # self.classmembers, self.canames = pace.featurization.build_allele_sets_from_seeds(whichAlleleSet,[1,7,11,13,14],400)
 
     def train(self, hits, misses):
         x = [list(s.peptide) for s in hits] + [list(s.peptide) for s in misses]
