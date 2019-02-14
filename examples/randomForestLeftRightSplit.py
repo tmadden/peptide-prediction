@@ -138,15 +138,28 @@ class RandomForestLeftRightSplit(pace.PredictionAlgorithm):
             predylistright[myi] = r.mean(axis=0)
 
         # now combine right and left predictions into a single prediction.
-        # for now use element-wise multiplication: idea being that both left and right need to be binders (1) to be a binder
-        predylist = [pl*pr for pl,pr in zip(predylistleft,predylistright)]
+        # can use simple element-wise multiplication: idea being that both left and 
+        # right need to be binders (1) to be a binder
+        # but here use sigmoids instead.
+        import math
+
+        def sigmoid(x):
+            return 1 / (1 + math.exp(-2*(x-.5)))
+
+        predylist = [sigmoid(pl)*sigmoid(pr) for pl,pr in zip(predylistleft,predylistright)]
         
         return predylist
 
 whichAlleleSet = 16
 
+my_scorers = {
+    'by_top_predictions': pace.evaluation.score_by_top_predictions,
+    'by_accuracy': lambda tr, pr : pace.evaluation.score_by_accuracy(tr, pr, cutoff=0.2)
+}
+
 scores = pace.evaluate(lambda : RandomForestLeftRightSplit(20, whichAlleleSet),
-                       **pace.load_data_set(whichAlleleSet, peptide_lengths=[8, 9, 10, 11]))
+                       **pace.load_data_set(whichAlleleSet, peptide_lengths=[8, 9, 10, 11]),
+                       scorers=my_scorers)
 pprint.pprint(scores)
 # print averages too
 print(sum(scores['by_accuracy'])/len(scores['by_accuracy']))

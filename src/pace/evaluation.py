@@ -1,10 +1,17 @@
 import random
 import numpy
+
 from collections import defaultdict
 import itertools
 from pace.definitions import *
 from pace.data import load_dataset
 from typing import NamedTuple, Optional, Set
+
+import sklearn
+import sklearn.metrics
+import matplotlib
+import matplotlib.pyplot as plt
+import time
 
 
 def score_by_ppv(truth, predictions, top_n=None):
@@ -73,6 +80,28 @@ def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
             c for (c, t) in zip(correctness, truth) if t == truth_value
         ]
         return sum(1 for c in filtered if c) / len(filtered) if filtered else 0
+
+    # compute and log the confusion matrix:
+    binaryp = numpy.where(numpy.array(predictions)>cutoff, 1, 0)
+    cm = sklearn.metrics.confusion_matrix(truth, binaryp)
+    print(cm)
+
+    # compute the ROC curve and save to a file, with some useful information.
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(truth, predictions, pos_label=1)
+    timestr = time.strftime('%Y%m%d-%H%M%S')
+    roc_auc = sklearn.metrics.auc(fpr, tpr)
+    plt.title('ROC. Confusion matrix displayed for cutoff = '+str(cutoff))
+    plt.plot(fpr, tpr, 'b', label = 'AUC = %0.2f' % roc_auc)
+    plt.legend(loc = 'lower right')
+    plt.plot([0, 1], [0, 1],'r--')
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.ylabel('True Positive Rate')
+    plt.xlabel('False Positive Rate')
+    plt.text(.6,.4,numpy.array2string(cm))
+    # plt.show()
+    plt.savefig('/home/dcraft/tplots/'+timestr+'_auc.png')
+    plt.clf()
 
     return score_for_truth(1) * binder_weight + score_for_truth(0) * (
         1 - binder_weight)
@@ -193,7 +222,6 @@ def generate_nonbinders(decoy_peptides, binders, nonbinder_ratio):
 
 
 default_scorers = {'ppv': PpvScorer(), 'accuracy': AccuracyScorer()}
-
 
 def evaluate(algorithm_class,
              dataset=load_dataset(),
