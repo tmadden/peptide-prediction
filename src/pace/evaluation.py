@@ -1,5 +1,6 @@
 import random
 import numpy
+from collections import defaultdict
 
 
 def score_by_top_predictions(truth, predictions, top_n=None):
@@ -46,6 +47,13 @@ def split_array(array, total_splits, split_index):
     return (array[start:end], array[:start] + array[end:])
 
 
+def partition_samples(samples):
+    d = defaultdict(list)
+    for s in samples:
+        d[(s.allele, len(s.peptide))].append(s)
+    return d
+
+
 def score(algorithm, binders, nonbinders, scorers):
     # Combine the samples and pair them up with their truth values.
     paired_samples = list(
@@ -72,10 +80,12 @@ def evaluate(algorithm_class,
              binders,
              nonbinders,
              scorers=default_scorers,
-             splits=6):
+             splits=5):
     # Shuffle both sample lists so that splits are random.
     random.shuffle(binders)
     random.shuffle(nonbinders)
+
+    partitioned_binders = partition_samples(binders)
 
     scores = {label: [] for label in scorers}
     for i in range(splits):
