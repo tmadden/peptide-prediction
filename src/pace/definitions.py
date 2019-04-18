@@ -3,6 +3,8 @@ from typing import NamedTuple
 
 amino_acids = "ACDEFGHIKLMNPQRSTVWY"
 
+peptide_lengths = [8, 9, 10, 11]
+
 
 class Sample(NamedTuple):
     allele: str
@@ -27,6 +29,36 @@ class PredictionAlgorithm(ABC):
 
         :param samples: samples to predict
 
-        :returns: an array-like value containing a prediction for each sample - Each prediction is a number between 0 and 1 indicating how likely the sample is to bind.
+        :returns: an array-like value containing a prediction for each sample -
+        Each prediction is a number between 0 and 1 indicating how likely the
+        sample is to bind.
+        """
+        pass  # pragma: no cover
+
+
+class DataSet(ABC):
+    @abstractmethod
+    def get_binders(self, length):
+        """
+        Get all binders with the specified length.
+
+        Note that this is allowed to return a single-use iterable.
+
+        :param length: the peptide length the caller is interested in
+
+        :returns: all binders with that length
+        """
+        pass  # pragma: no cover
+
+    @abstractmethod
+    def get_nonbinders(self, length):
+        """
+        Get all nonbinders with the specified length.
+
+        Note that this is allowed to return a single-use iterable.
+
+        :param length: the peptide length the caller is interested in
+
+        :returns: all nonbinders with that length
         """
         pass  # pragma: no cover

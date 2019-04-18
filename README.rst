@@ -48,7 +48,7 @@ A trivial example is below. This algorithm skips the training phase and simply p
 
     # Evaluate our algorithm using PACE.
     scores = pace.evaluate(FairlyPoorAlgorithm,
-                           **pace.load_data_set(16, nonbinder_fraction=0.9))
+                           **pace.load_dataset(16, nonbinder_fraction=0.9))
     pprint.pprint(scores)
 
 This produces the following output:

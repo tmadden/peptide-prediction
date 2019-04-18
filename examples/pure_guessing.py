@@ -12,5 +12,5 @@ class PureGuessingAlgorithm(pace.PredictionAlgorithm):
 
 
 scores = pace.evaluate(PureGuessingAlgorithm,
-                       **pace.load_data_set(16, nonbinder_fraction=0.9))
+                       **pace.load_dataset(16, nonbinder_fraction=0.9))
 pprint.pprint(scores)
