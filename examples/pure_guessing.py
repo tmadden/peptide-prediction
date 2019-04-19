@@ -11,6 +11,5 @@ class PureGuessingAlgorithm(pace.PredictionAlgorithm):
         return [random.uniform(0, 1) for _ in samples]
 
 
-scores = pace.evaluate(PureGuessingAlgorithm,
-                       **pace.load_dataset(16, nonbinder_fraction=0.9))
+scores = pace.evaluate(PureGuessingAlgorithm, pace.load_dataset(16))
 pprint.pprint(scores)

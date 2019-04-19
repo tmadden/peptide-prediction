@@ -262,3 +262,91 @@ def test_evaluation_splitting():
             return [1] * len(samples)
 
     pace.evaluate(TestAlgorithm, pace.load_dataset(16), nbr_test=2)
+
+
+def test_evaluation_filtering():
+    # This tests that the evaluation algorithm is properly filtering samples
+    # to the training and test stages.
+    from itertools import chain
+    from pace.evaluation import SampleFilter, matches_filter
+
+    class TestAlgorithm(pace.PredictionAlgorithm):
+        def __init__(self, training_filter, test_filter):
+            self.training_filter = training_filter
+            self.test_filter = test_filter
+
+        def train(self, binders, nonbinders):
+            for s in chain(binders, nonbinders):
+                assert matches_filter(self.training_filter, s.allele,
+                                      len(s.peptide))
+
+        def predict(self, samples):
+            for s in samples:
+                assert matches_filter(self.test_filter, s.allele,
+                                      len(s.peptide))
+            return [1] * len(samples)
+
+    pace.evaluate(
+        lambda: TestAlgorithm(
+            SampleFilter(alleles={'A0101'}, lengths={8, 9, 10, 11}),
+            SampleFilter(alleles={'A0101'}, lengths={8, 9, 10, 11})),
+        pace.load_dataset(16),
+        selected_alleles=['A0101'],
+        nbr_test=1)
+
+    pace.evaluate(
+        lambda: TestAlgorithm(
+            SampleFilter(alleles={'A0101'}, lengths={9, 10}),
+            SampleFilter(alleles={'A0101'}, lengths={9, 10})),
+        pace.load_dataset(16),
+        selected_alleles=['A0101'],
+        selected_lengths=[9, 10],
+        nbr_test=1)
+
+    pace.evaluate(
+        lambda: TestAlgorithm(
+            SampleFilter(alleles={'A0101'}, lengths={8, 11}),
+            SampleFilter(alleles={'A0201'}, lengths={8, 11})),
+        pace.load_dataset(16),
+        selected_alleles=['A0101'],
+        selected_lengths=[8, 11],
+        test_alleles=['A0201'],
+        nbr_test=1)
+
+    pace.evaluate(
+        lambda: TestAlgorithm(
+            SampleFilter(alleles={'A0101'}, lengths={8, 11}),
+            SampleFilter(alleles={'A0101', 'A0201'}, lengths={9, 10})),
+        pace.load_dataset(16),
+        selected_alleles=['A0101'],
+        selected_lengths=[8, 11],
+        test_alleles=['A0101', 'A0201'],
+        test_lengths=[9, 10],
+        nbr_test=1)
+
+
+def test_evaluation_nbr():
+    # This tests that the evaluation algorithm honors the requested nonbinder
+    # ratio, at least for training.
+
+    class TestAlgorithm(pace.PredictionAlgorithm):
+        def __init__(self, nbr_train):
+            self.nbr_train = nbr_train
+
+        def train(self, binders, nonbinders):
+            assert len(nonbinders) == int(len(binders) * self.nbr_train)
+
+        def predict(self, samples):
+            return [1] * len(samples)
+
+    pace.evaluate(lambda: TestAlgorithm(1), pace.load_dataset(16))
+    pace.evaluate(
+        lambda: TestAlgorithm(2),
+        pace.load_dataset(16),
+        nbr_train=2,
+        nbr_test=1)
+    pace.evaluate(
+        lambda: TestAlgorithm(3),
+        pace.load_dataset(16),
+        nbr_train=3,
+        nbr_test=1)
