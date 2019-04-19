@@ -172,7 +172,7 @@ def evaluate(algorithm_class,
     Parameters
     ----------
     algorithm_class
-        a function taking no arguments which returns a new instance of the
+        a function taking no arguments that returns a new instance of the
         algorithm to test - If the algorithm class has a default constructor,
         you can simply pass in the class itself. Otherwise, pass in a lambda
         that fills in the constructor arguments appropriately. The algorithm
@@ -181,9 +181,11 @@ def evaluate(algorithm_class,
     dataset
 
     folds
-        the number of folds (iterations) to perform (default is 5)
+        the number of folds (i.e., iterations) to perform (default is 5)
 
     selected_alleles
+
+
 
 
     Returns
