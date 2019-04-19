@@ -11,18 +11,25 @@ def score_by_top_predictions(truth, predictions, top_n=None):
     Score a set of predictions by ranking them and determining what fraction of
     the top predictions are actually binders.
 
-    :param truth: an array of numbers indicating the true binding scores - All
-    entries are either 0 or 1.
+    Parameters
+    ----------
+    truth
+        an array of numbers indicating the true binding scores - All entries are
+        either 0 or 1.
 
-    :param predictions: an array of numbers indicating the predicted binding
-    scores - All entries are between 0 and 1.
+    predictions
+        an array of numbers indicating the predicted binding scores - All
+        entries are between 0 and 1.
 
-    :param top_n: the number of 'top' predictions to consider in the score
-    (e.g., If this is 20, then we only care that the algorithm's top 20
-    predictions are actually binders.) - This should be no larger than the
-    number of true binders. If omitted, all true binders are considered.
+    top_n
+        the number of 'top' predictions to consider in the score (e.g., If this
+        is 20, then we only care that the algorithm's top 20 predictions are
+        actually binders.) - This should be no larger than the number of true
+        binders. If omitted, all true binders are considered.
 
-    :returns: a score between 0 and 1
+    Returns
+    -------
+    a score between 0 and 1
     """
     top_n = top_n or truth.count(1)
     top_predictions = numpy.argsort(predictions)[-top_n:]
@@ -33,13 +40,21 @@ def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
     """
     Score a set of predictions by their accuracy.
 
-    :param cutoff: the value separating 'binders' predictions and 'nonbinder'
-    predictions (defaults to 0.5) - Predictions are considered accurate if they
-    land on the same side of the cutoff value as the truth.
+    Parameters
+    ----------
+    cutoff
+        the value separating 'binders' predictions and 'nonbinder' predictions
+        (defaults to 0.5) - Predictions are considered accurate if they land on
+        the same side of the cutoff value as the truth.
 
-    :param binder_weight: the fraction that the binder score contributes to the
-    overall score - The prediction accuracy for binders and nonbinders is
-    considered separately and then combined according to this weight.
+    binder_weight
+        the fraction that the binder score contributes to the overall score -
+        The prediction accuracy for binders and nonbinders is considered
+        separately and then combined according to this weight.
+
+    Returns
+    -------
+    a score between 0 and 1
     """
     correctness = [(t > cutoff) == (p > cutoff)
                    for (t, p) in zip(truth, predictions)]
@@ -55,6 +70,9 @@ def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
 
 
 def partition_samples(samples):
+    """
+    Partition samples according to allele and peptide length.
+    """
     d = defaultdict(list)
     for s in samples:
         d[(s.allele, len(s.peptide))].append(s)
@@ -62,6 +80,9 @@ def partition_samples(samples):
 
 
 def split_array(array, total_splits, split_index):
+    """
+    Split an array according to
+    """
     start = len(array) * split_index // total_splits
     end = len(array) * (split_index + 1) // total_splits
     return (array[start:end], array[:start] + array[end:])
@@ -140,6 +161,35 @@ def evaluate(algorithm_class,
              test_lengths=None,
              nbr_test=10,
              scorers=default_scorers):
+    """
+    Evaluate an algorithm.
+
+    Given a dataset and an algorithm, this evaluates the algorithm by repeatedly
+    splitting the data into training and testing subsets, training a new
+    algorithm instance, asking it to make predictions about the testing subset,
+    and scoring those predictions.
+
+    Parameters
+    ----------
+    algorithm_class
+        a function taking no arguments which returns a new instance of the
+        algorithm to test - If the algorithm class has a default constructor,
+        you can simply pass in the class itself. Otherwise, pass in a lambda
+        that fills in the constructor arguments appropriately. The algorithm
+        must implement the interface specified by pace.PredictionAlgorithm.
+
+    dataset
+
+    folds
+        the number of folds (iterations) to perform (default is 5)
+
+    selected_alleles
+
+
+    Returns
+    -------
+    a score between 0 and 1
+    """
 
     if selected_alleles:
         selected_alleles = set(selected_alleles)

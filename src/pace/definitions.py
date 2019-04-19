@@ -17,8 +17,12 @@ class PredictionAlgorithm(ABC):
         """
         Train this instance using the supplied training data.
 
-        :param binders: samples that are known to bind
-        :param nonbinders: samples that are known to not bind
+        Parameters
+        ----------
+        binders
+            samples that are known to bind
+        nonbinders
+            samples that are known to not bind
         """
         pass  # pragma: no cover
 
@@ -27,11 +31,16 @@ class PredictionAlgorithm(ABC):
         """
         Predict whether or not a list of samples will bind.
 
-        :param samples: samples to predict
+        Parameters
+        ----------
+        samples
+            the samples to predict
 
-        :returns: an array-like value containing a prediction for each sample -
-        Each prediction is a number between 0 and 1 indicating how likely the
-        sample is to bind.
+        Returns
+        -------
+        an array-like value containing a prediction for each sample - Each
+        prediction is a number between 0 and 1 indicating how likely the sample
+        is to bind.
         """
         pass  # pragma: no cover
 
@@ -42,11 +51,15 @@ class DataSet(ABC):
         """
         Get all binders with the specified length.
 
-        Note that this is allowed to return a single-use iterable.
+        Parameters
+        ----------
+        length
+            the peptide length the caller is interested in
 
-        :param length: the peptide length the caller is interested in
-
-        :returns: all binders with that length
+        Returns
+        -------
+        all binders with that length - Note that this is allowed to return a
+        single-use iterable.
         """
         pass  # pragma: no cover
 
@@ -55,10 +68,14 @@ class DataSet(ABC):
         """
         Get all nonbinders with the specified length.
 
-        Note that this is allowed to return a single-use iterable.
+        Parameters
+        ----------
+        length
+            the peptide length the caller is interested in
 
-        :param length: the peptide length the caller is interested in
-
-        :returns: all nonbinders with that length
+        Returns
+        -------
+        all binders with that length - Note that this is allowed to return a
+        single-use iterable.
         """
         pass  # pragma: no cover
