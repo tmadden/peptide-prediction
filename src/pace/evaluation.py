@@ -184,8 +184,42 @@ def evaluate(algorithm_class,
         the number of folds (i.e., iterations) to perform (default is 5)
 
     selected_alleles
+        a list of alleles to use for training - If a value is given here, the
+        dataset is filtered so that only samples for those alleles are used for
+        training. (By default, no filtering is done.) Note that this will also
+        determine the filtering of the test data unless a different filter is
+        explicitly specified.
 
+    selected_lengths
+        a list of peptide lengths to use for training - If a value is given
+        here, the dataset is filtered so that only samples for those lengths
+        are used for training. (By default, no filtering is done.) Note that
+        this will also determine the filtering of the test data unless a
+        different filter is explicitly specified.
 
+    nbr_train
+        the nonbinder ratio for training - This is the ratio of nonbinders to
+        binders used for training the algorithm. It defaults to 1.
+
+    test_alleles
+        a list of alleles to use for testing - This is equivalent to
+        selected_allles but determines the filtering for the testing phase.
+        By default, the same set that was used for training is also used for
+        testing.
+
+    test_lengths
+        a list of peptide lengths to use for testing - This is equivalent to
+        selected_lengths but determines the filtering for the testing phase.
+        By default, the same set that was used for training is also used for
+        testing.
+
+    test_lengths
+
+    nbr_test
+        the nonbinder ratio for testing - This is the ratio of nonbinders to
+        binders used for testing the algorithm. It defaults to 100.
+
+    scorers
 
 
     Returns

@@ -1,14 +1,6 @@
 PACE
 ====
 
-.. image:: https://img.shields.io/travis/tmadden/pace/master.svg?style=flat&logo=travis
-    :target: https://travis-ci.org/tmadden/pace
-
-.. image:: https://img.shields.io/codecov/c/github/tmadden/pace/master.svg?style=flat
-    :target: https://codecov.io/gh/tmadden/pace
-
-|
-
 Welcome to PACE, a framework for comparing machine learning algorithms for the
 peptide-MHC binding problem. While many potential solutions to this problem have
 been published, a shared dataset and evaluation protocol have been missing,
@@ -21,6 +13,16 @@ development of prediction algorithms, such as characteristics for alleles,
 utilities for implementing algorithms on common machine learning frameworks,
 etc.
 
-For info on using PACE, check out the `main documentation <https://onpace.readthedocs.io/latest/getting-started.html>`_.
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Core
 
-Contributions are welcome. We will publish contribution guidelines shortly...
+   getting-started
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Extensions
+
+    sklearn
