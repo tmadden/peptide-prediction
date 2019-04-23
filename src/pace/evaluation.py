@@ -213,13 +213,12 @@ def evaluate(algorithm_class,
         By default, the same set that was used for training is also used for
         testing.
 
-    test_lengths
-
     nbr_test
         the nonbinder ratio for testing - This is the ratio of nonbinders to
         binders used for testing the algorithm. It defaults to 100.
 
     scorers
+
 
 
     Returns
