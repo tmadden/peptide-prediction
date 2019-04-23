@@ -19,6 +19,7 @@ etc.
    :caption: Core
 
    getting-started
+   python-api-reference
 
 .. toctree::
    :maxdepth: 2
