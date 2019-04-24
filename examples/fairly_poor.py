@@ -14,5 +14,5 @@ class FairlyPoorAlgorithm(pace.PredictionAlgorithm):
 
 
 # Evaluate our algorithm using PACE.
-scores = pace.evaluate(FairlyPoorAlgorithm, pace.load_dataset())
+scores = pace.evaluate(FairlyPoorAlgorithm)
 pprint.pprint(scores)

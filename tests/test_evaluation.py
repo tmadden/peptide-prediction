@@ -261,7 +261,7 @@ def test_evaluation_splitting():
                 assert s not in self.nonbinders
             return [1] * len(samples)
 
-    pace.evaluate(TestAlgorithm, pace.load_dataset(), nbr_test=2)
+    pace.evaluate(TestAlgorithm, nbr_test=2)
 
 
 def test_evaluation_filtering():
@@ -290,7 +290,6 @@ def test_evaluation_filtering():
         lambda: TestAlgorithm(
             SampleFilter(alleles={'A0101'}, lengths={8, 9, 10, 11}),
             SampleFilter(alleles={'A0101'}, lengths={8, 9, 10, 11})),
-        pace.load_dataset(),
         selected_alleles=['A0101'],
         nbr_test=1)
 
@@ -298,7 +297,6 @@ def test_evaluation_filtering():
         lambda: TestAlgorithm(
             SampleFilter(alleles={'A0101'}, lengths={9, 10}),
             SampleFilter(alleles={'A0101'}, lengths={9, 10})),
-        pace.load_dataset(),
         selected_alleles=['A0101'],
         selected_lengths=[9, 10],
         nbr_test=1)
@@ -307,7 +305,6 @@ def test_evaluation_filtering():
         lambda: TestAlgorithm(
             SampleFilter(alleles={'A0101'}, lengths={8, 11}),
             SampleFilter(alleles={'A0201'}, lengths={8, 11})),
-        pace.load_dataset(),
         selected_alleles=['A0101'],
         selected_lengths=[8, 11],
         test_alleles=['A0201'],
@@ -317,7 +314,6 @@ def test_evaluation_filtering():
         lambda: TestAlgorithm(
             SampleFilter(alleles={'A0101'}, lengths={8, 11}),
             SampleFilter(alleles={'A0101', 'A0201'}, lengths={9, 10})),
-        pace.load_dataset(),
         selected_alleles=['A0101'],
         selected_lengths=[8, 11],
         test_alleles=['A0101', 'A0201'],
@@ -339,8 +335,6 @@ def test_evaluation_nbr():
         def predict(self, samples):
             return [1] * len(samples)
 
-    pace.evaluate(lambda: TestAlgorithm(1), pace.load_dataset())
-    pace.evaluate(
-        lambda: TestAlgorithm(2), pace.load_dataset(), nbr_train=2, nbr_test=1)
-    pace.evaluate(
-        lambda: TestAlgorithm(3), pace.load_dataset(), nbr_train=3, nbr_test=1)
+    pace.evaluate(lambda: TestAlgorithm(1))
+    pace.evaluate(lambda: TestAlgorithm(2), nbr_train=2, nbr_test=1)
+    pace.evaluate(lambda: TestAlgorithm(3), nbr_train=3, nbr_test=1)
