@@ -5,4 +5,7 @@ __version__ = _pgk_resources.require("pace")[0].version
 # Import the package-level API.
 from .evaluation import evaluate
 from .definitions import *
-from .data import load_data_set
+
+# Since this is a package, we need to explicitly tell Python that we want our
+# globals exposed.
+__all__ = [g for g in globals().keys() if not g.startswith('_')]

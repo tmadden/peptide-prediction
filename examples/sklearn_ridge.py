@@ -25,6 +25,5 @@ class RidgeAlgorithm(pace.PredictionAlgorithm):
         return self.clf.predict(encoded_x)
 
 
-scores = pace.evaluate(RidgeAlgorithm,
-                       **pace.load_data_set(16, peptide_lengths=[9]))
+scores = pace.evaluate(RidgeAlgorithm, selected_lengths=[9])
 pprint.pprint(scores)
