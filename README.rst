@@ -21,6 +21,6 @@ development of prediction algorithms, such as characteristics for alleles,
 utilities for implementing algorithms on common machine learning frameworks,
 etc.
 
-For info on using PACE, check out the `main documentation <https://onpace.readthedocs.io/latest/getting-started.html>`_.
+To get started using PACE, check out the `documentation <https://onpace.readthedocs.io/latest/getting-started.html>`_.
 
-Contributions are welcome. We will publish contribution guidelines shortly...
+Contributions are welcome.
