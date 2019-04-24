@@ -7,7 +7,7 @@ from pace.data import load_dataset
 from typing import NamedTuple, Optional, Set
 
 
-def score_by_top_predictions(truth, predictions, top_n=None):
+def score_by_ppv(truth, predictions, top_n=None):
     """
     Score a set of predictions by ranking them and determining what fraction of
     the top predictions are actually binders.
@@ -38,10 +38,10 @@ def score_by_top_predictions(truth, predictions, top_n=None):
     return sum([truth[i] for i in top_predictions]) / top_n
 
 
-class TopPredictionsScorer(Scorer):
+class PpvScorer(Scorer):
     def score(self, results):
-        return score_by_top_predictions([r.truth for r in results],
-                                        [r.prediction for r in results])
+        return score_by_ppv([r.truth for r in results],
+                            [r.prediction for r in results])
 
 
 def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
@@ -167,10 +167,7 @@ def generate_nonbinders(decoy_peptides, binders, nonbinder_ratio):
     return nonbinders
 
 
-default_scorers = {
-    'top_predictions': TopPredictionsScorer(),
-    'accuracy': AccuracyScorer()
-}
+default_scorers = {'ppv': PpvScorer(), 'accuracy': AccuracyScorer()}
 
 
 def evaluate(algorithm_class,
