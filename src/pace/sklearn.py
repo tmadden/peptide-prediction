@@ -12,12 +12,13 @@ def create_one_hot_encoder(length):
 
     Parameters
     ----------
-    length
-    the expected length of the peptides to be encoded
+    length : int
+        the expected length of the peptides to be encoded
 
     Returns
     -------
-    an sklearn.preprocessing.OneHotEncoder
+    sklearn.preprocessing.OneHotEncoder
+        the created encoder
     """
     import sklearn.preprocessing
 

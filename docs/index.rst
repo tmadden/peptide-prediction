@@ -26,4 +26,4 @@ etc.
    :hidden:
    :caption: Extensions
 
-    sklearn
+   sklearn

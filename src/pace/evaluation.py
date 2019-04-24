@@ -2,7 +2,8 @@ import random
 import numpy
 from collections import defaultdict
 import itertools
-from pace.definitions import Sample, peptide_lengths
+from pace.definitions import *
+from pace.data import load_dataset
 from typing import NamedTuple, Optional, Set
 
 
@@ -29,11 +30,18 @@ def score_by_top_predictions(truth, predictions, top_n=None):
 
     Returns
     -------
-    a score between 0 and 1
+    float
+        a score between 0 and 1
     """
     top_n = top_n or truth.count(1)
     top_predictions = numpy.argsort(predictions)[-top_n:]
     return sum([truth[i] for i in top_predictions]) / top_n
+
+
+class TopPredictionsScorer(Scorer):
+    def score(self, results):
+        return score_by_top_predictions([r.truth for r in results],
+                                        [r.prediction for r in results])
 
 
 def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
@@ -42,19 +50,20 @@ def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
 
     Parameters
     ----------
-    cutoff
+    cutoff : float
         the value separating 'binders' predictions and 'nonbinder' predictions
         (defaults to 0.5) - Predictions are considered accurate if they land on
         the same side of the cutoff value as the truth.
 
-    binder_weight
+    binder_weight : float
         the fraction that the binder score contributes to the overall score -
         The prediction accuracy for binders and nonbinders is considered
         separately and then combined according to this weight.
 
     Returns
     -------
-    a score between 0 and 1
+    float
+        a score between 0 and 1
     """
     correctness = [(t > cutoff) == (p > cutoff)
                    for (t, p) in zip(truth, predictions)]
@@ -69,6 +78,18 @@ def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
         1 - binder_weight)
 
 
+class AccuracyScorer(Scorer):
+    def __init__(self, cutoff=0.5, binder_weight=0.5):
+        self.cutoff = cutoff
+        self.binder_weight = binder_weight
+
+    def score(self, results):
+        return score_by_accuracy([r.truth for r in results],
+                                 [r.prediction for r in results],
+                                 cutoff=self.cutoff,
+                                 binder_weight=self.binder_weight)
+
+
 def partition_samples(samples):
     """
     Partition samples according to allele and peptide length.
@@ -80,9 +101,6 @@ def partition_samples(samples):
 
 
 def split_array(array, total_splits, split_index):
-    """
-    Split an array according to
-    """
     start = len(array) * split_index // total_splits
     end = len(array) * (split_index + 1) // total_splits
     return (array[start:end], array[:start] + array[end:])
@@ -127,12 +145,16 @@ def score(algorithm, binders, nonbinders, scorers):
     # would receive samples in a predictable order (with binders followed by
     # nonbinders).
     random.shuffle(paired_samples)
-    # Now extract the samples and truth values in the shuffled order.
-    shuffled_samples = [sample for sample, score in paired_samples]
-    truth = [score for sample, score in paired_samples]
     # Ask the algorithm for predictions and score them.
-    predictions = algorithm.predict(shuffled_samples)
-    return {label: f(truth, predictions) for label, f in scorers.items()}
+    predictions = algorithm.predict(
+        [sample for sample, score in paired_samples])
+    # Construct the results.
+    results = [
+        PredictionResult(sample=sample, truth=score, prediction=prediction)
+        for (sample, score), prediction in zip(paired_samples, predictions)
+    ]
+    # Invoke the scorers.
+    return {label: s.score(results) for label, s in scorers.items()}
 
 
 def generate_nonbinders(decoy_peptides, binders, nonbinder_ratio):
@@ -146,13 +168,13 @@ def generate_nonbinders(decoy_peptides, binders, nonbinder_ratio):
 
 
 default_scorers = {
-    'by_top_predictions': score_by_top_predictions,
-    'by_accuracy': score_by_accuracy
+    'top_predictions': TopPredictionsScorer(),
+    'accuracy': AccuracyScorer()
 }
 
 
 def evaluate(algorithm_class,
-             dataset,
+             dataset=load_dataset(),
              folds=5,
              selected_alleles=None,
              selected_lengths=None,
@@ -165,65 +187,74 @@ def evaluate(algorithm_class,
     Evaluate an algorithm.
 
     Given a dataset and an algorithm, this evaluates the algorithm by repeatedly
-    splitting the data into training and testing subsets, training a new
+    splitting the dataset into training and testing subsets, training a new
     algorithm instance, asking it to make predictions about the testing subset,
     and scoring those predictions.
 
     Parameters
     ----------
-    algorithm_class
+    algorithm_class : pace.PredictionAlgorithm
         a function taking no arguments that returns a new instance of the
         algorithm to test - If the algorithm class has a default constructor,
         you can simply pass in the class itself. Otherwise, pass in a lambda
         that fills in the constructor arguments appropriately. The algorithm
-        must implement the interface specified by pace.PredictionAlgorithm.
+        must implement the interface specified by
+        :class:`pace.PredictionAlgorithm`.
 
-    dataset
+    dataset : pace.Dataset
+        the dataset to use for testing - If omitted, the builtin dataset is
+        used. The dataset must implement the interface specified by
+        :class:`pace.Dataset`.
 
-    folds
+    folds : int
         the number of folds (i.e., iterations) to perform (default is 5)
 
-    selected_alleles
+    selected_alleles : List[str], optional
         a list of alleles to use for training - If a value is given here, the
         dataset is filtered so that only samples for those alleles are used for
         training. (By default, no filtering is done.) Note that this will also
         determine the filtering of the test data unless a different filter is
         explicitly specified.
 
-    selected_lengths
+    selected_lengths : List[int], optional
         a list of peptide lengths to use for training - If a value is given
         here, the dataset is filtered so that only samples for those lengths
         are used for training. (By default, no filtering is done.) Note that
         this will also determine the filtering of the test data unless a
         different filter is explicitly specified.
 
-    nbr_train
-        the nonbinder ratio for training - This is the ratio of nonbinders to
-        binders used for training the algorithm. It defaults to 1.
+    nbr_train : float, optional
+        the nonbinder ratio for training - This determines the ratio of
+        nonbinders to binders in the set of samples used for training the
+        algorithm. It defaults to 1.
 
-    test_alleles
+    test_alleles : List[str], optional
         a list of alleles to use for testing - This is equivalent to
-        selected_allles but determines the filtering for the testing phase.
+        ``selected_allles`` but determines the filtering for the testing phase.
         By default, the same set that was used for training is also used for
         testing.
 
-    test_lengths
+    test_lengths : List[int], optional
         a list of peptide lengths to use for testing - This is equivalent to
-        selected_lengths but determines the filtering for the testing phase.
+        ``selected_lengths`` but determines the filtering for the testing phase.
         By default, the same set that was used for training is also used for
         testing.
 
     nbr_test
-        the nonbinder ratio for testing - This is the ratio of nonbinders to
-        binders used for testing the algorithm. It defaults to 100.
+        the nonbinder ratio for testing - This determines the ratio of
+        nonbinders to binders in the set of samples used for testing the
+        algorithm. It defaults to 10. (Using a value much higher than 10 with
+        the default dataset (without subselecting) will exhaust the pool of
+        nonbinders.)
 
-    scorers
-
-
+    scorers : Dict[str,pace.Scorer]
+        a map from labels to scorers - If omitted,
+        ``pace.evaluation.default_scorers`` is used.
 
     Returns
     -------
-    a score between 0 and 1
+    Dict[str,List[Any]]
+
     """
 
     if selected_alleles:

@@ -6,7 +6,10 @@ setup(
     setup_requires=["pytest-runner", "setuptools-git-version"],
     install_requires=["numpy"],
     tests_require=["pytest", "pytest-cov", "scikit-learn>=0.20"],
-    extras_require={"sklearn": ["scikit-learn>=0.20"]},
+    extras_require={
+        "sklearn": ["scikit-learn>=0.20"],
+        "docs": ["sphinx"]
+    },
     packages=["pace"],
     package_dir={"": "src"},
     package_data={

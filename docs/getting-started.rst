@@ -40,14 +40,14 @@ predicts that peptides always bind to alleles that start with the same letter.
             return [1 if s.allele[0] == s.peptide[0] else 0 for s in samples]
 
     # Evaluate our algorithm using PACE.
-    scores = pace.evaluate(FairlyPoorAlgorithm, pace.load_dataset(16))
+    scores = pace.evaluate(FairlyPoorAlgorithm, pace.load_dataset())
     pprint.pprint(scores)
 
 This produces the following output:
 
 ::
 
-    {'by_accuracy': [0.399618966977138,
+    {'accuracy': [0.399618966977138,
                      0.4155843184198713,
                      0.4877250735697541,
                      0.5181480373085939,

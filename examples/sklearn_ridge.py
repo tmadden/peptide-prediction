@@ -26,5 +26,5 @@ class RidgeAlgorithm(pace.PredictionAlgorithm):
 
 
 scores = pace.evaluate(
-    RidgeAlgorithm, pace.load_dataset(16), selected_lengths=[9])
+    RidgeAlgorithm, pace.load_dataset(), selected_lengths=[9])
 pprint.pprint(scores)

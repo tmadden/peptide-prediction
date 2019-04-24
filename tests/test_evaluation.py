@@ -172,7 +172,7 @@ def test_simple_evaluation():
         "GG", "HH", "I", "J", "K", "L", "MM", "NN", "O", "P", "Q", "R"
     ]
 
-    class TestDataSet(pace.DataSet):
+    class TestDataset(pace.Dataset):
         def get_binders(self, length):
             binders = {
                 2: [
@@ -205,10 +205,10 @@ def test_simple_evaluation():
 
     boa_scores = evaluate(
         BlindlyOptimisticAlgorithm,
-        TestDataSet(),
+        TestDataset(),
         selected_lengths=[1, 2],
         nbr_test=1)
-    assert numpy.mean(boa_scores['by_accuracy']) == 0.5
+    assert numpy.mean(boa_scores['accuracy']) == 0.5
 
     # This algorithm thinks that any peptide starting with A-D binds.
     # Its accuracy depends on how we filter the samples.
@@ -221,29 +221,29 @@ def test_simple_evaluation():
 
     lba_scores = evaluate(
         LengthBasedAlgorithm,
-        TestDataSet(),
+        TestDataset(),
         selected_lengths=[1, 2],
         nbr_test=1,
         folds=4)
-    assert 0.8 <= numpy.mean(lba_scores['by_accuracy']) <= 0.875
+    assert 0.8 <= numpy.mean(lba_scores['accuracy']) <= 0.875
 
     lba_scores = evaluate(
         LengthBasedAlgorithm,
-        TestDataSet(),
+        TestDataset(),
         selected_lengths=[1, 2],
         test_lengths=[2],
         nbr_test=1,
         folds=4)
-    assert numpy.mean(lba_scores['by_accuracy']) == 1
+    assert numpy.mean(lba_scores['accuracy']) == 1
 
     lba_scores = evaluate(
         LengthBasedAlgorithm,
-        TestDataSet(),
+        TestDataset(),
         selected_lengths=[1, 2],
         test_lengths=[1],
         nbr_test=1,
         folds=4)
-    assert numpy.mean(lba_scores['by_accuracy']) == 0.5
+    assert numpy.mean(lba_scores['accuracy']) == 0.5
 
 
 def test_evaluation_splitting():
@@ -261,7 +261,7 @@ def test_evaluation_splitting():
                 assert s not in self.nonbinders
             return [1] * len(samples)
 
-    pace.evaluate(TestAlgorithm, pace.load_dataset(16), nbr_test=2)
+    pace.evaluate(TestAlgorithm, pace.load_dataset(), nbr_test=2)
 
 
 def test_evaluation_filtering():
@@ -290,7 +290,7 @@ def test_evaluation_filtering():
         lambda: TestAlgorithm(
             SampleFilter(alleles={'A0101'}, lengths={8, 9, 10, 11}),
             SampleFilter(alleles={'A0101'}, lengths={8, 9, 10, 11})),
-        pace.load_dataset(16),
+        pace.load_dataset(),
         selected_alleles=['A0101'],
         nbr_test=1)
 
@@ -298,7 +298,7 @@ def test_evaluation_filtering():
         lambda: TestAlgorithm(
             SampleFilter(alleles={'A0101'}, lengths={9, 10}),
             SampleFilter(alleles={'A0101'}, lengths={9, 10})),
-        pace.load_dataset(16),
+        pace.load_dataset(),
         selected_alleles=['A0101'],
         selected_lengths=[9, 10],
         nbr_test=1)
@@ -307,7 +307,7 @@ def test_evaluation_filtering():
         lambda: TestAlgorithm(
             SampleFilter(alleles={'A0101'}, lengths={8, 11}),
             SampleFilter(alleles={'A0201'}, lengths={8, 11})),
-        pace.load_dataset(16),
+        pace.load_dataset(),
         selected_alleles=['A0101'],
         selected_lengths=[8, 11],
         test_alleles=['A0201'],
@@ -317,7 +317,7 @@ def test_evaluation_filtering():
         lambda: TestAlgorithm(
             SampleFilter(alleles={'A0101'}, lengths={8, 11}),
             SampleFilter(alleles={'A0101', 'A0201'}, lengths={9, 10})),
-        pace.load_dataset(16),
+        pace.load_dataset(),
         selected_alleles=['A0101'],
         selected_lengths=[8, 11],
         test_alleles=['A0101', 'A0201'],
@@ -339,14 +339,8 @@ def test_evaluation_nbr():
         def predict(self, samples):
             return [1] * len(samples)
 
-    pace.evaluate(lambda: TestAlgorithm(1), pace.load_dataset(16))
+    pace.evaluate(lambda: TestAlgorithm(1), pace.load_dataset())
     pace.evaluate(
-        lambda: TestAlgorithm(2),
-        pace.load_dataset(16),
-        nbr_train=2,
-        nbr_test=1)
+        lambda: TestAlgorithm(2), pace.load_dataset(), nbr_train=2, nbr_test=1)
     pace.evaluate(
-        lambda: TestAlgorithm(3),
-        pace.load_dataset(16),
-        nbr_train=3,
-        nbr_test=1)
+        lambda: TestAlgorithm(3), pace.load_dataset(), nbr_train=3, nbr_test=1)

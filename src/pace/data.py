@@ -5,7 +5,7 @@ import io
 import random
 
 from pkg_resources import resource_stream
-from pace.definitions import DataSet
+from pace.definitions import Dataset
 
 
 def as_text_stream(stream):
@@ -36,7 +36,7 @@ def read_alleles_file(stream):
     return (line.strip() for line in as_text_stream(stream))
 
 
-class BuiltinDataSet(DataSet):
+class BuiltinDataset(Dataset):
     def __init__(self, allele_count):
         self.allele_count = allele_count
 
@@ -51,5 +51,20 @@ class BuiltinDataSet(DataSet):
             resource_stream("pace", "data/decoys_{}.txt".format(length)))
 
 
-def load_dataset(allele_count):
-    return BuiltinDataSet(allele_count)
+def load_dataset(allele_count=16):
+    """
+    Load the default dataset.
+
+    Parameters
+    -------
+    allele_count : int
+        the allele count of the dataset to load - Currently there is only one
+        dataset provided, which has an allele count of 16, so this parameter can
+        be omitted.
+
+    Returns
+    -------
+    pace.Dataset
+        the requested dataset
+    """
+    return BuiltinDataset(allele_count)
