@@ -1,6 +1,7 @@
 import pace, pace.sklearn, pace.featurization
 import sklearn.linear_model
 import pprint
+import sklearn
 
 
 class RidgeAlgorithm(pace.PredictionAlgorithm):
@@ -29,5 +30,6 @@ class RidgeAlgorithm(pace.PredictionAlgorithm):
         return self.clf.predict(encoded_x)
 
 
-scores = pace.evaluate(RidgeAlgorithm, selected_lengths=[9])
+#scores = pace.evaluate(RidgeAlgorithm, selected_lengths=[8,9,10,11])
+scores = pace.evaluate(RidgeAlgorithm, selected_lengths=[8,9,10,11],dataset=pace.data.load_dataset(95))
 pprint.pprint(scores)
