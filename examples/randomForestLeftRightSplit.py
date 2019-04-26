@@ -99,7 +99,7 @@ class RandomForestLeftRightSplit(pace.PredictionAlgorithm):
 
         # step through these alleles, left version
         for aname in ua:
-            print('working on allele '+aname)
+            print('predicting: working on allele '+aname)
             # get which forests to use for this allele [allele aname]
             # DEBUG here i could have this return a list of forests, instead of indices, directly.
             useforestsleft = pace.featurization.get_all_sets_for_allele(aname,self.alleles_in_this_forest_left, self.canamesLEFT)
@@ -150,17 +150,18 @@ class RandomForestLeftRightSplit(pace.PredictionAlgorithm):
         
         return predylist
 
-whichAlleleSet = 16
+whichAlleleSet = 95
 
+"""
 my_scorers = {
     'by_top_predictions': pace.evaluation.score_by_top_predictions,
     'by_accuracy': lambda tr, pr : pace.evaluation.score_by_accuracy(tr, pr, cutoff=0.2)
 }
+"""
 
 scores = pace.evaluate(lambda : RandomForestLeftRightSplit(20, whichAlleleSet),
-                       **pace.load_data_set(whichAlleleSet, peptide_lengths=[8, 9, 10, 11]),
-                       scorers=my_scorers)
+                       selected_lengths=[8,9,10,11],dataset=pace.data.load_dataset(whichAlleleSet))
 pprint.pprint(scores)
 # print averages too
-print(sum(scores['by_accuracy'])/len(scores['by_accuracy']))
-print(sum(scores['by_top_predictions'])/len(scores['by_top_predictions']))
+print(sum(scores['accuracy'])/len(scores['accuracy']))
+print(sum(scores['ppv'])/len(scores['ppv']))

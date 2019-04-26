@@ -99,8 +99,8 @@ class RandomForestWithAlleleSets(pace.PredictionAlgorithm):
 
         return predylist
 
-whichAlleleSet = 16
+whichAlleleSet = 95
 
 scores = pace.evaluate(lambda : RandomForestWithAlleleSets(20, whichAlleleSet),
-                       **pace.load_data_set(whichAlleleSet, peptide_lengths=[8, 9, 10, 11]))
+                       selected_lengths=[8,9,10,11],dataset=pace.data.load_dataset(whichAlleleSet))
 pprint.pprint(scores)

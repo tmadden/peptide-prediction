@@ -5,6 +5,15 @@ import itertools
 from pace.definitions import *
 from pace.data import load_dataset
 from typing import NamedTuple, Optional, Set
+import sklearn, time
+import matplotlib
+import matplotlib.pyplot as plt
+import logging
+
+logging.basicConfig(filename='paceRun.log',level=logging.INFO)
+#logging.debug('This message should go to the log file')
+#logging.info('So should this')
+#logging.warning('And this, too')
 
 def score_by_ppv(truth, predictions, top_n=None):
     """
@@ -309,6 +318,7 @@ def evaluate(algorithm_class,
 
     scores = {label: [] for label in scorers}
     for training_binders, test_binders in binder_split:
+        logging.info('Training loop ...')
         training_nonbinders = generate_nonbinders(decoy_peptides,
                                                   training_binders, nbr_train)
 
