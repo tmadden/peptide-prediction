@@ -147,6 +147,31 @@ def matches_filter(filter, allele, length):
 
 
 def stratified_split(samples, total_splits, training_filter, test_filter):
+    """
+    Perform a series of stratified splits of the original sample data into
+    training and testing sets.
+
+    Parameters
+    ----------
+    samples : List[pace.Sample]
+
+    total_splits : int
+        the number of times to split the data - This determines the length of
+        the generated sequence.
+
+    training_filter : SampleFilter
+        the filter to apply to training data
+
+    test_filter : SampleFilter
+        the filter to apply to test data
+
+    Yields
+    ------
+    Tuple[List[pace.Sample], List[pace.Sample]]
+        a tuple containing the lists of training samples (first) and test
+        samples (second)
+    """
+
     partitioned = partition_samples(samples)
     for split_index in range(total_splits):
         training_samples = list()
@@ -157,8 +182,8 @@ def stratified_split(samples, total_splits, training_filter, test_filter):
             if in_training:
                 if in_test:
                     a, b = split_array(bin, total_splits, split_index)
-                    training_samples.extend(a)
-                    test_samples.extend(b)
+                    test_samples.extend(a)
+                    training_samples.extend(b)
                 else:
                     training_samples.extend(bin)
             else:
@@ -274,13 +299,14 @@ def evaluate(algorithm_class,
         nonbinders.)
 
     scorers : Dict[str,pace.Scorer]
-        a map from labels to scorers - If omitted,
+        a mapping from labels to scorers - If omitted,
         ``pace.evaluation.default_scorers`` is used.
 
     Returns
     -------
     Dict[str,List[Any]]
-
+        a mapping from scorer labels to the results returned by that scorer (one
+        per fold)
     """
 
     if selected_alleles:

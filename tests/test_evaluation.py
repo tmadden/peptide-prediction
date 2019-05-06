@@ -73,30 +73,51 @@ def test_stratified_split():
     samples = [
         pace.Sample(allele="A", peptide="AZ"),
         pace.Sample(allele="A", peptide="UV"),
+        pace.Sample(allele="A", peptide="GH"),
         pace.Sample(allele="B", peptide="XY"),
         pace.Sample(allele="B", peptide="OP"),
+        pace.Sample(allele="B", peptide="IJ"),
         pace.Sample(allele="B", peptide="E"),
-        pace.Sample(allele="B", peptide="F")
+        pace.Sample(allele="B", peptide="F"),
+        pace.Sample(allele="B", peptide="T")
     ]
     filter = SampleFilter(alleles=None, lengths={1, 2})
-    assert list(stratified_split(samples, 2, filter, filter)) == \
+    assert list(stratified_split(samples, 3, filter, filter)) == \
         [([
+            pace.Sample(allele="A", peptide="UV"),
+            pace.Sample(allele="A", peptide="GH"),
+            pace.Sample(allele="B", peptide="OP"),
+            pace.Sample(allele="B", peptide="IJ"),
+            pace.Sample(allele="B", peptide="F"),
+            pace.Sample(allele="B", peptide="T")
+        ], [
             pace.Sample(allele="A", peptide="AZ"),
             pace.Sample(allele="B", peptide="XY"),
+            pace.Sample(allele="B", peptide="E")
+        ]),
+        ([
+            pace.Sample(allele="A", peptide="AZ"),
+            pace.Sample(allele="A", peptide="GH"),
+            pace.Sample(allele="B", peptide="XY"),
+            pace.Sample(allele="B", peptide="IJ"),
             pace.Sample(allele="B", peptide="E"),
+            pace.Sample(allele="B", peptide="T")
         ], [
             pace.Sample(allele="A", peptide="UV"),
             pace.Sample(allele="B", peptide="OP"),
             pace.Sample(allele="B", peptide="F")
         ]),
         ([
+            pace.Sample(allele="A", peptide="AZ"),
             pace.Sample(allele="A", peptide="UV"),
+            pace.Sample(allele="B", peptide="XY"),
             pace.Sample(allele="B", peptide="OP"),
+            pace.Sample(allele="B", peptide="E"),
             pace.Sample(allele="B", peptide="F")
         ], [
-            pace.Sample(allele="A", peptide="AZ"),
-            pace.Sample(allele="B", peptide="XY"),
-            pace.Sample(allele="B", peptide="E"),
+            pace.Sample(allele="A", peptide="GH"),
+            pace.Sample(allele="B", peptide="IJ"),
+            pace.Sample(allele="B", peptide="T")
         ])]
 
 
@@ -116,18 +137,18 @@ def test_filtered_stratified_split():
         [([
             pace.Sample(allele="A", peptide="AZ"),
             pace.Sample(allele="A", peptide="UV"),
-            pace.Sample(allele="B", peptide="XY")
+            pace.Sample(allele="B", peptide="OP")
         ], [
-            pace.Sample(allele="B", peptide="OP"),
+            pace.Sample(allele="B", peptide="XY"),
             pace.Sample(allele="B", peptide="E"),
             pace.Sample(allele="B", peptide="F")
         ]),
         ([
             pace.Sample(allele="A", peptide="AZ"),
             pace.Sample(allele="A", peptide="UV"),
-            pace.Sample(allele="B", peptide="OP")
+            pace.Sample(allele="B", peptide="XY")
         ], [
-            pace.Sample(allele="B", peptide="XY"),
+            pace.Sample(allele="B", peptide="OP"),
             pace.Sample(allele="B", peptide="E"),
             pace.Sample(allele="B", peptide="F")
         ])]
@@ -168,10 +189,6 @@ def test_nonbinder_generation():
 def test_simple_evaluation():
     from pace.evaluation import evaluate
 
-    nonbinders = [
-        "GG", "HH", "I", "J", "K", "L", "MM", "NN", "O", "P", "Q", "R"
-    ]
-
     class TestDataset(pace.Dataset):
         def get_binders(self, length):
             binders = {
@@ -206,6 +223,7 @@ def test_simple_evaluation():
     boa_scores = evaluate(
         BlindlyOptimisticAlgorithm,
         TestDataset(),
+        folds=2,
         selected_lengths=[1, 2],
         nbr_test=1)
     assert numpy.mean(boa_scores['accuracy']) == 0.5
@@ -242,7 +260,7 @@ def test_simple_evaluation():
         selected_lengths=[1, 2],
         test_lengths=[1],
         nbr_test=1,
-        folds=4)
+        folds=2)
     assert numpy.mean(lba_scores['accuracy']) == 0.5
 
 
