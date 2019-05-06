@@ -10,6 +10,7 @@ import sklearn, time
 import matplotlib
 import matplotlib.pyplot as plt
 import logging
+<<<<<<< HEAD
 
 logging.basicConfig(filename='paceRun.log',level=logging.INFO)
 #logging.debug('This message should go to the log file')
@@ -21,7 +22,13 @@ import sklearn.metrics
 import matplotlib
 import matplotlib.pyplot as plt
 import time
+=======
+>>>>>>> 125f82be7641964a57ab22d2efed61aac4d78511
 
+logging.basicConfig(filename='paceRun.log',level=logging.INFO)
+#logging.debug('This message should go to the log file')
+#logging.info('So should this')
+#logging.warning('And this, too')
 
 def score_by_ppv(truth, predictions, top_n=None):
     """
