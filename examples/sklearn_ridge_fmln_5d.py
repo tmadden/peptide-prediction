@@ -30,8 +30,8 @@ class RidgeAlgorithmFMLN5D(pace.PredictionAlgorithm):
 
         return self.clf.predict(encoded_x)
 
-
+whichAlleleSet=95
 
 scores = pace.evaluate(RidgeAlgorithmFMLN5D,
-                       **pace.load_data_set(16, peptide_lengths=[8, 9, 10, 11]))
+                       selected_lengths=[8,9,10,11],dataset=pace.data.load_dataset(whichAlleleSet))
 pprint.pprint(scores)

@@ -144,7 +144,7 @@ class RandomForestLeftRightSplit(pace.PredictionAlgorithm):
         import math
 
         def sigmoid(x):
-            return 1 / (1 + math.exp(-2*(x-.5)))
+            return 1 / (1 + math.exp(-10*(x-.5)))
 
         predylist = [sigmoid(pl)*sigmoid(pr) for pl,pr in zip(predylistleft,predylistright)]
         
@@ -152,16 +152,15 @@ class RandomForestLeftRightSplit(pace.PredictionAlgorithm):
 
 whichAlleleSet = 95
 
-"""
-my_scorers = {
-    'by_top_predictions': pace.evaluation.score_by_top_predictions,
-    'by_accuracy': lambda tr, pr : pace.evaluation.score_by_accuracy(tr, pr, cutoff=0.2)
-}
-"""
+my_scorers = {'ppv': pace.evaluation.PpvScorer(), 'accuracy': pace.evaluation.AccuracyScorer(cutoff=0.6)}
 
-scores = pace.evaluate(lambda : RandomForestLeftRightSplit(20, whichAlleleSet),
-                       selected_lengths=[8,9,10,11],dataset=pace.data.load_dataset(whichAlleleSet))
+test_alleles = pace.featurization.a16_names
+
+scores = pace.evaluate(lambda : RandomForestLeftRightSplit(20, whichAlleleSet), scorers=my_scorers,
+                       selected_lengths=[8,9,10,11],dataset=pace.data.load_dataset(whichAlleleSet),
+                       test_alleles=test_alleles)
 pprint.pprint(scores)
 # print averages too
+# note we should rename accuracy scorer to "weighted_accuracy"
 print(sum(scores['accuracy'])/len(scores['accuracy']))
 print(sum(scores['ppv'])/len(scores['ppv']))

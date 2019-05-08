@@ -10,6 +10,7 @@ import sklearn, time
 import matplotlib
 import matplotlib.pyplot as plt
 import logging
+from sklearn.metrics import precision_recall_curve
 
 logging.basicConfig(filename='paceRun.log',level=logging.INFO)
 #logging.debug('This message should go to the log file')
@@ -87,7 +88,11 @@ def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
     binaryp = numpy.where(numpy.array(predictions)>cutoff, 1, 0)
     cm = sklearn.metrics.confusion_matrix(truth, binaryp)
     print(cm)
+    print(len(truth))
+    print(numpy.sum(truth))
 
+    rawaccuracy = (cm[0,0]+cm[1,1])/(cm[1,1]+cm[1,0]+cm[0,0]+cm[0,1])
+    print('raw accuracy = {0}'.format(rawaccuracy))
     # compute the ROC curve and save to a file, with some useful information.
     fpr, tpr, thresholds = sklearn.metrics.roc_curve(truth, predictions, pos_label=1)
     timestr = time.strftime('%Y%m%d-%H%M%S')
@@ -104,6 +109,26 @@ def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
     # plt.show()
     plt.savefig('/home/dcraft/tplots/'+timestr+'_auc.png')
     plt.clf()
+
+    # compute the PrecRecall curve and save to a file, with some useful information.
+    precision, recall, thresholds = sklearn.metrics.precision_recall_curve(truth, predictions, pos_label=1)
+    timestr = time.strftime('%Y%m%d-%H%M%S')
+    pr_auc = sklearn.metrics.auc(recall, precision)
+    plt.title('Prec-Recall. Confusion matrix displayed for cutoff = '+str(cutoff))
+    plt.plot(recall, precision, 'b', label = 'AUPRC = %0.2f' % pr_auc)
+    plt.legend(loc = 'lower left')
+    plt.plot([0, 1], [1, 0],'g:')
+    plt.plot([0, 1], [0, 1],'b--')
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.ylabel('Precision (= PPV)')
+    plt.xlabel('Recall (= sensitivity)')
+    plt.text(.05,.5,numpy.array2string(cm))
+    plt.grid(True)
+    # plt.show()
+    plt.savefig('/home/dcraft/tplots/'+timestr+'_WE95auprc.png')
+    plt.clf()
+
 
     return score_for_truth(1) * binder_weight + score_for_truth(0) * (
         1 - binder_weight)
