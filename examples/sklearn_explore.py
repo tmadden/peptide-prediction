@@ -25,11 +25,16 @@ class ExploreAlgorithm(pace.PredictionAlgorithm):
         self.encoding_style = encoding_style
 
     def do_encoding(self,x):
+        xorig = x
         x = pace.featurization.do_FMLN_encoding(x,m=self.fmln_m,n=self.fmln_n)
         if self.encoding_style == 'one_hot':
             encoder = pace.sklearn.create_one_hot_encoder(len(x[0]))
             encoder.fit(x)
-            return encoder.transform(x).toarray()
+            r = encoder.transform(x).toarray()
+            #also do binary encoding of peptide length
+            bepl = pace.featurization.do_binary_peptide_length_encoding(xorig)
+            return np.concatenate((r,bepl),axis=1)
+            #return r
         elif self.encoding_style == '5d':
             return pace.featurization.do_5d_encoding(x)
         else:
@@ -114,13 +119,21 @@ class ExploreAlgorithm(pace.PredictionAlgorithm):
     def predict(self, samples):
         x = [list(s.peptide) for s in samples]
         encoded_x = self.do_encoding(x)
+        #to get probabilities rather than 0/1, use predict_proba
+        #but note this gives a probability for each class so in our binary case
+        #it gives an n_samples x 2 array. just use second column, which is prob of "1", binder.
+        #does much better for ppv!
+        r = self.clf.predict_proba(encoded_x)
+        return r[:,1]
+        #return self.clf.predict(encoded_x)
 
-        return self.clf.predict(encoded_x)
+a02 = ['A0203']
+a68 = ['A6802']
+b35 = ['B3501']
+#my_scorers = {'ppv': pace.evaluation.PpvScorer(), 'accuracy': pace.evaluation.AccuracyScorer(cutoff=0.6)}
 
-
-#allele_set = ['A0204']
-scores = pace.evaluate(lambda: ExploreAlgorithm(3,3,encoding_style='one_hot'), selected_lengths=[8,9,10,11],test_lengths=[11],
-                       selected_alleles=['B5401'], test_alleles=['B5401'], dataset=pace.data.load_dataset(16))
+scores = pace.evaluate(lambda: ExploreAlgorithm(5,4,encoding_style='5d'), selected_lengths=[9],
+                       selected_alleles=b35, dataset=pace.data.load_dataset(16), nbr_test=10)
 
 pprint.pprint(scores)
 ppvvals = scores["ppv"]
@@ -133,7 +146,7 @@ print('std ppv = '+str(np.std(ppvvals)))
 #                       selected_alleles=[a], dataset=pace.data.load_dataset(16)) for a in pace.featurization.a16_names]
 
 # double loop, lengths and alleles
-#this way below works byt hard to print out stuff along way / debug so...
+#this way below works but hard to print out stuff along way / debug so...
 #r = [ [pace.evaluate(lambda: ExploreAlgorithm(4,4+i,encoding_style='one_hot'), selected_lengths=[i+8],
 #                    selected_alleles=[a], dataset=pace.data.load_dataset(16)) for i in range(4) ] 
 #                    for a in pace.featurization.a16_names]
@@ -148,4 +161,5 @@ for a in pace.featurization.a16_names:
         myr = pace.evaluate(lambda: ExploreAlgorithm(5,4+i,encoding_style='one_hot'), selected_lengths=[i+9],
                             selected_alleles=[a], dataset=pace.data.load_dataset(16))
         r[i].append(myr)
+scipy.io.savemat('newResultsPROBA.mat', mdict={'r': r})
 '''
