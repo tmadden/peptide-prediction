@@ -88,8 +88,8 @@ def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
     binaryp = numpy.where(numpy.array(predictions)>cutoff, 1, 0)
     cm = sklearn.metrics.confusion_matrix(truth, binaryp)
     print(cm)
-    print(len(truth))
-    print(numpy.sum(truth))
+    print('total number of test samples = '+str(len(truth)))
+    print('total number of true binders in test samples = '+str(numpy.sum(truth)))
 
     rawaccuracy = (cm[0,0]+cm[1,1])/(cm[1,1]+cm[1,0]+cm[0,0]+cm[0,1])
     print('raw accuracy = {0}'.format(rawaccuracy))
@@ -234,8 +234,16 @@ def score(algorithm, binders, nonbinders, scorers):
         PredictionResult(sample=sample, truth=score, prediction=prediction)
         for (sample, score), prediction in zip(paired_samples, predictions)
     ]
+    # craft: adding this to examine false positives:
+    falsepositives = [r.sample.peptide for r in results if r.truth==0 and r.prediction>.5]
+    theirpredvalues = [r.prediction for r in results if r.truth==0 and r.prediction>.5]
+    #(should really sort and print out false hits under the ppv measure, i.e. the false hits of the top [num true positives])
+    print('false positives and their pred scores:')
+    #print(theirpredvalues)
+    for fp,fps in zip(falsepositives,theirpredvalues):
+        print(fp,fps)
     # Invoke the scorers.
-    return {label: s.score(results) for label, s in scorers.items()}
+    return {label: s.score(results) for label, s in scorers.items()}, results
 
 
 def generate_nonbinders(decoy_peptides, binders, nonbinder_ratio):
@@ -369,8 +377,9 @@ def evaluate(algorithm_class,
         SampleFilter(alleles=test_alleles, lengths=test_lengths))
 
     scores = {label: [] for label in scorers}
+    all_fold_results = []
     for training_binders, test_binders in binder_split:
-        logging.info('Training loop ...')
+        logging.info('Training and testing loop ...')
         training_nonbinders = generate_nonbinders(decoy_peptides,
                                                   training_binders, nbr_train)
 
@@ -384,8 +393,10 @@ def evaluate(algorithm_class,
         algorithm.train(training_binders, training_nonbinders)
 
         # Do the scoring and record the scores.
-        new_scores = score(algorithm, test_binders, test_nonbinders, scorers)
+        new_scores, fold_results = score(algorithm, test_binders, test_nonbinders, scorers)
+        # craft addition: save all the fold results for single ppv calc at end using test data from all folds combined:
+        all_fold_results.extend(fold_results)
         for label in scorers.keys():
             scores[label].append(new_scores[label])
 
-    return scores
+    return scores, all_fold_results
