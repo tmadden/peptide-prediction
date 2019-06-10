@@ -23,7 +23,7 @@ class WeaveConcatenate(Concatenate):
         # doing the weave with reshape, transpose, and another reshape.
 
         # https://stackoverflow.com/questions/44952886/tensorflow-merge-two-2-d-tensors-according-to-even-and-odd-indices
-        # prety sure this is doing weave correctly but should check with some real tensor examples.
+        # pretty sure this is doing weave correctly but should check with some real tensor examples.
         a = inputs[0]
         b = inputs[1]
         w = tf.reshape(
@@ -92,6 +92,7 @@ class RSDLayer(Dense):
                 y = temp
             else:
                 y = K.concatenate([y, temp], axis=1)
+            seqPos = seqPos + self.input_block_size
 
         output = y
         if self.use_bias:
