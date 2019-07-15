@@ -186,9 +186,9 @@ def generate_nonbinders(decoy_peptides, binders, nonbinder_ratio):
     nonbinders = []
     for (allele, length), samples in partition_samples(binders).items():
         nonbinder_count = int(len(samples) * nonbinder_ratio)
-        for _ in range(0, nonbinder_count):
+        for i in random.choices(list(range(0, len(decoy_peptides[length]))), k=nonbinder_count):
             nonbinders.append(
-                Sample(allele=allele, peptide=next(decoy_peptides[length])))
+                Sample(allele=allele, peptide=decoy_peptides[length][i]))
     return nonbinders
 
 
@@ -204,7 +204,8 @@ def evaluate(algorithm_class,
              test_alleles=None,
              test_lengths=None,
              nbr_test=10,
-             scorers=default_scorers):
+             scorers=default_scorers,
+             random_seed=127):
     """
     Evaluate an algorithm.
 
@@ -273,12 +274,17 @@ def evaluate(algorithm_class,
         a mapping from labels to scorers - If omitted,
         ``pace.evaluation.default_scorers`` is used.
 
+    random_seed : int, optional
+        the random seed used to initialize the random state to ensure 
+        reproducible splits are obtained between different runs
+
     Returns
     -------
     Dict[str,List[Any]]
         a mapping from scorer labels to the results returned by that scorer (one
         per fold)
     """
+    random.seed(random_seed)
 
     if selected_alleles:
         selected_alleles = set(selected_alleles)
@@ -303,7 +309,7 @@ def evaluate(algorithm_class,
             (dataset.get_binders(length) for length in all_lengths)))
 
     decoy_peptides = {
-        length: iter(dataset.get_nonbinders(length))
+        length: dataset.get_nonbinders(length)
         for length in all_lengths
     }
 

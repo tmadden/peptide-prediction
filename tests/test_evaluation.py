@@ -1,3 +1,4 @@
+import random
 import numpy
 import pace
 
@@ -167,23 +168,20 @@ def test_nonbinder_generation():
         1: ["A", "B", "C", "D"],
         2: ["AB", "BC", "CD", "DE", "EF", "FG", "GH", "HI"]
     }
-    decoy_iters = {
-        length: iter(decoys)
-        for length, decoys in decoy_peptides.items()
-    }
     expected_nonbinders = [
+        pace.Sample(allele="A", peptide="FG"),
         pace.Sample(allele="A", peptide="AB"),
-        pace.Sample(allele="A", peptide="BC"),
         pace.Sample(allele="A", peptide="CD"),
-        pace.Sample(allele="A", peptide="DE"),
-        pace.Sample(allele="B", peptide="EF"),
+        pace.Sample(allele="A", peptide="BC"),
         pace.Sample(allele="B", peptide="FG"),
+        pace.Sample(allele="B", peptide="FG"),
+        pace.Sample(allele="B", peptide="D"),
         pace.Sample(allele="B", peptide="A"),
         pace.Sample(allele="B", peptide="B"),
-        pace.Sample(allele="B", peptide="C"),
-        pace.Sample(allele="B", peptide="D")
+        pace.Sample(allele="B", peptide="A")
     ]
-    assert generate_nonbinders(decoy_iters, samples, 2) == expected_nonbinders
+    random.seed(42)
+    assert generate_nonbinders(decoy_peptides, samples, 2) == expected_nonbinders
 
 
 def test_simple_evaluation():

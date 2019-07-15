@@ -7,15 +7,13 @@ from pkg_resources import resource_stream
 def test_decoy_parsing():
     decoys = pace.data.read_decoys_file(
         resource_stream("pace", "data/decoys_9.txt"))
-    assert next(decoys) == "RISLRKVRS"
-    assert next(decoys) == "LNGSKLWIS"
-    assert next(decoys) == "LTMAVLHVT"
-    assert next(decoys) == "LPEGSKDSF"
-    # Test that decoys wrap.
-    for i in range(0, 982787):
-        next(decoys)
-    assert next(decoys) == "RISLRKVRS"
-    assert next(decoys) == "LNGSKLWIS"
+    assert len(decoys) == 982791
+    assert decoys[:4] == [
+            "AAAAAAAAF",
+            "AAAAAAAAV",
+            "AAAAAAACL",
+            "AAAAAAADE"
+    ]
 
 
 def test_hits_parsing():
