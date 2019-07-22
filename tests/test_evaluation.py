@@ -204,11 +204,8 @@ def test_simple_evaluation():
             return binders[length]
 
         def get_nonbinders(self, length):
-            def generator(length):
-                while True:
-                    yield ['Z'] * length
-
-            return generator(length)
+            return [''.join(['Y'] * length),
+                    ''.join(['Z'] * length)]
 
     # This algorithm thinks everything binds.
     class BlindlyOptimisticAlgorithm(pace.PredictionAlgorithm):

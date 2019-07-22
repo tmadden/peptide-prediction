@@ -308,10 +308,13 @@ def evaluate(algorithm_class,
         chain.from_iterable(
             (dataset.get_binders(length) for length in all_lengths)))
 
-    decoy_peptides = {
-        length: dataset.get_nonbinders(length)
-        for length in all_lengths
-    }
+    decoy_peptides_train = {}
+    decoy_peptides_test = {}
+    for length in all_lengths:
+        decoys = dataset.get_nonbinders(length)
+        train_test_split_mask = random.choices([0,1], k=len(decoys))
+        decoy_peptides_train[length] = [d for (d, b) in zip(decoys, train_test_split_mask) if b]
+        decoy_peptides_test[length] = [d for (d, b) in zip(decoys, train_test_split_mask) if not b]
 
     random.shuffle(binders)
     binder_split = stratified_split(
@@ -321,10 +324,10 @@ def evaluate(algorithm_class,
 
     scores = {label: [] for label in scorers}
     for training_binders, test_binders in binder_split:
-        training_nonbinders = generate_nonbinders(decoy_peptides,
+        training_nonbinders = generate_nonbinders(decoy_peptides_train,
                                                   training_binders, nbr_train)
 
-        test_nonbinders = generate_nonbinders(decoy_peptides, test_binders,
+        test_nonbinders = generate_nonbinders(decoy_peptides_test, test_binders,
                                               nbr_test)
 
         # Create a fresh algorithm instance and train it.

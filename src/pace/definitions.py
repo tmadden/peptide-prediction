@@ -64,9 +64,8 @@ class Dataset(ABC):
 
         Returns
         -------
-        Iterable[pace.Sample]
-            all binders with that length - Note that this is allowed to return a
-            single-use iterable.
+        List[str]
+            all non-binder peptides with that length.
         """
         pass  # pragma: no cover
 
