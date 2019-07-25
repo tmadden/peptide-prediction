@@ -25,12 +25,7 @@ def read_hits_file(stream):
 
 def read_decoys_file(stream):
     stream = as_text_stream(stream)
-    while True:
-        for line in stream:
-            yield line.strip()
-        # We ran out of decoys, so reset to the beginning of the stream.
-        stream.seek(0, 0)
-
+    return [x.strip() for x in stream.readlines()]
 
 def read_alleles_file(stream):
     return (line.strip() for line in as_text_stream(stream))

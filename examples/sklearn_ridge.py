@@ -1,6 +1,7 @@
 import pace, pace.sklearn
 import sklearn.linear_model
 import pprint
+import numpy
 
 
 class RidgeAlgorithm(pace.PredictionAlgorithm):
@@ -24,6 +25,6 @@ class RidgeAlgorithm(pace.PredictionAlgorithm):
 
         return self.clf.predict(encoded_x)
 
-
+numpy.random.seed(31415)
 scores = pace.evaluate(RidgeAlgorithm, selected_lengths=[9])
 pprint.pprint(scores)
