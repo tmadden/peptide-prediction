@@ -102,8 +102,15 @@ class RandomForestWithAlleleSetsWithout5Dencode(pace.PredictionAlgorithm):
 
         return predylist
 
-whichAlleleSet = 16
+whichAlleleSet = 95
+
+test_alleles = pace.featurization.a16_names
+#test_alleles = None
+
 
 scores = pace.evaluate(lambda : RandomForestWithAlleleSetsWithout5Dencode(20, whichAlleleSet),
-                       selected_lengths=[8,9,10,11],dataset=pace.data.load_dataset(whichAlleleSet))
+                       selected_lengths=[8,9,10,11],dataset=pace.data.load_dataset(whichAlleleSet),
+                       test_alleles=test_alleles)
 pprint.pprint(scores)
+print(sum(scores['accuracy'])/len(scores['accuracy']))
+print(sum(scores['ppv'])/len(scores['ppv']))

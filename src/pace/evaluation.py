@@ -237,11 +237,23 @@ def score(algorithm, binders, nonbinders, scorers):
     # craft: adding this to examine false positives:
     falsepositives = [r.sample.peptide for r in results if r.truth==0 and r.prediction>.5]
     theirpredvalues = [r.prediction for r in results if r.truth==0 and r.prediction>.5]
-    #(should really sort and print out false hits under the ppv measure, i.e. the false hits of the top [num true positives])
-    print('false positives and their pred scores:')
-    #print(theirpredvalues)
-    for fp,fps in zip(falsepositives,theirpredvalues):
-        print(fp,fps)
+    
+    #print('false positives and their pred scores:')
+    #for fp,fps in zip(falsepositives,theirpredvalues):
+    #    print(fp,fps)
+    #print out false hits ala the ppv measure, i.e. the false hits of the top [num true positives]:
+    print('false positives in top batch')
+    truth = [r.truth for r in results]
+    #predictions = [r.prediction for r in results]
+    peptides = [r.sample.peptide for r in results]
+    top_n = truth.count(1)
+    print('top_n = '+str(top_n))
+    top_predictions = numpy.argsort(predictions)[-top_n:]
+    for i in range(len(top_predictions)):
+        myi = top_predictions[i]
+        if truth[myi]==0:
+            print(peptides[myi]+' with score = '+str(predictions[myi]))
+
     # Invoke the scorers.
     return {label: s.score(results) for label, s in scorers.items()}, results
 

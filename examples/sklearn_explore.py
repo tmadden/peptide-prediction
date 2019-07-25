@@ -1,7 +1,9 @@
 import pace, pace.sklearn, pace.featurization, pace.evaluation
 import sklearn.linear_model
 import sklearn.gaussian_process
+from sklearn.model_selection import GridSearchCV
 from sklearn.gaussian_process.kernels import RBF
+from sklearn.metrics import make_scorer
 import pprint
 import sklearn
 import calendar, time
@@ -18,6 +20,8 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from Bio import motifs
 from Bio.Alphabet import IUPAC
 from Bio.Seq import Seq
+#import pickle
+from joblib import dump, load
 
 class ExploreAlgorithm(pace.PredictionAlgorithm):
 
@@ -34,11 +38,17 @@ class ExploreAlgorithm(pace.PredictionAlgorithm):
             encoder.fit(x)
             r = encoder.transform(x).toarray()
             #also do binary encoding of peptide length
-            bepl = pace.featurization.do_binary_peptide_length_encoding(xorig)
-            return np.concatenate((r,bepl),axis=1)
-            #return r
+            #bepl = pace.featurization.do_binary_peptide_length_encoding(xorig)
+            #return np.concatenate((r,bepl),axis=1)
+            return r
         elif self.encoding_style == '5d':
             return pace.featurization.do_5d_encoding(x)
+        elif self.encoding_style == 'both':
+            encoder = pace.sklearn.create_one_hot_encoder(len(x[0]))
+            encoder.fit(x)
+            ronehot = encoder.transform(x).toarray()
+            r5d = pace.featurization.do_5d_encoding(x)
+            return np.concatenate((ronehot,r5d),axis=1)
         else:
             raise Exception('Unknown encoding style used: '+self.encoding_style)
         
@@ -48,7 +58,8 @@ class ExploreAlgorithm(pace.PredictionAlgorithm):
         x = [list(s.peptide)
              for s in binders] + [list(s.peptide) for s in nonbinders]
         y = [1] * len(binders) + [0] * len(nonbinders)
-
+        print('aaaaaaaaaaaaaaaaaaaaaaaaaa')
+        print(len(y))
         encoded_x = self.do_encoding(x)
 
         #create forbidden residues rules: look at binders and form something like:
@@ -93,10 +104,27 @@ class ExploreAlgorithm(pace.PredictionAlgorithm):
         #self.clf = sklearn.linear_model.SGDClassifier(loss='log',max_iter=800,tol=1e-2,penalty='l2').fit(encoded_x, y)
         #self.clf = sklearn.neighbors.KNeighborsClassifier(10, weights='distance').fit(encoded_x, y)
         #RBF SVM is best yet tested
-        #self.clf = sklearn.svm.SVC(C=10,kernel='rbf',gamma='scale').fit(encoded_x, y)
+        #for small runs [default nbr params] these are the best for 5d encoding
+        #self.clf = sklearn.svm.SVC(C=1000,kernel='rbf',gamma=.001,probability=True).fit(encoded_x, y)
+        #and these for one-hot
+        #self.clf = sklearn.svm.SVC(C=10,kernel='rbf',gamma=.02,probability=True).fit(encoded_x, y)
         #linear also good.
         #self.clf = sklearn.svm.SVC(C=.1,kernel='linear').fit(encoded_x, y)
         
+        #example of parameter tuning: slows things down a lot.
+        '''
+        param_grid = [
+            {'C': [.1, 1, 10, 100], 'kernel': ['linear']},
+            {'C': [1, 10, 100, 1000, 10000], 'gamma': [0.01, 0.001, 0.0001], 'kernel': ['rbf']},
+        ]
+        usescore = make_scorer(pace.evaluation.score_by_ppv)
+        self.clf = GridSearchCV(sklearn.svm.SVC(probability=True), param_grid, cv=5, scoring=usescore)
+        print('executing grid search...')
+        self.clf.fit(encoded_x, y)
+        print("Best parameters found:")
+        print(self.clf.best_params_)
+        '''
+
         #try Gaussian Naive Bayes. not so good.
         #self.clf = GaussianNB().fit(encoded_x, y)
         
@@ -127,6 +155,8 @@ class ExploreAlgorithm(pace.PredictionAlgorithm):
 
         #ok now try voting classifier using a bunch (can take or leave the sgd..): this here is a good reasonable set. below will try adding in more.
         
+        #this is the main one i've been using for tests so far. but commenting it out for now to work on some good single classifiers
+        
         self.clf = VotingClassifier(estimators=[
             ('svmrbf', sklearn.svm.SVC(C=10,kernel='rbf',gamma='scale', probability=True)), 
             ('svmlin', sklearn.svm.SVC(C=.1,kernel='linear', probability=True)), 
@@ -143,6 +173,11 @@ class ExploreAlgorithm(pace.PredictionAlgorithm):
             ('sgd', sklearn.linear_model.SGDClassifier(loss='log',max_iter=800,tol=1e-2,penalty='l2'))], voting='soft')
         self.clf.fit(encoded_x, y)
         '''
+        
+        #to save the classifier for external use:
+        #dump(self.clf, 'votingclassifier.joblib') 
+        #dump(encoded_x, 'samplex.joblib')
+        
 
     def predict(self, samples):
         x = [list(s.peptide) for s in samples]
@@ -169,13 +204,12 @@ class ExploreAlgorithm(pace.PredictionAlgorithm):
                             itisok = False
                             break
             return not itisok
-        
+        '''
         for i in range(len(samples)):
             if has_forbidden_residue(samples[i].peptide,self.forbidden_residues):
                 # print('changing probability from '+str(r[i])+' to 0.001 for sequence: '+samples[i].peptide)
                 r[i] = [0.999, 0.001]
-        
-
+        '''
         return r[:,1]
         #return self.clf.predict(encoded_x)
 
@@ -186,7 +220,7 @@ b35 = ['B3501']
 
 #note setting nbr_train to 10 improves things by a couple points.
 scores, all_fold_results = pace.evaluate(lambda: ExploreAlgorithm(5,4,encoding_style='one_hot'), selected_lengths=[9],
-                                         selected_alleles=b35, dataset=pace.data.load_dataset(16), nbr_train=1, nbr_test=100)
+                                         selected_alleles=b35, dataset=pace.data.load_dataset(16), nbr_train=10, nbr_test=1000)
 
 pprint.pprint(scores)
 ppvvals = scores["ppv"]

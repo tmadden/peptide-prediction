@@ -154,7 +154,8 @@ whichAlleleSet = 95
 
 my_scorers = {'ppv': pace.evaluation.PpvScorer(), 'accuracy': pace.evaluation.AccuracyScorer(cutoff=0.6)}
 
-test_alleles = pace.featurization.a16_names
+#test_alleles = pace.featurization.a16_names
+test_alleles = None
 
 scores = pace.evaluate(lambda : RandomForestLeftRightSplit(20, whichAlleleSet), scorers=my_scorers,
                        selected_lengths=[8,9,10,11],dataset=pace.data.load_dataset(whichAlleleSet),

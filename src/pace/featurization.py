@@ -17,6 +17,19 @@ def do_FMLN_encoding(peplist, m=8, n=3):
 
     return [p[0:m] + p[-n:] for p in peplist]
 
+def do_binary_peptide_length_encoding(peplist):
+    """
+    8-mers -> 0,1
+    9-mers -> 0,0
+    10-mers -> 1,0
+    11-mers -> 1,1
+
+    :returns: encoded peptide list
+    """
+    #binary length encoding:
+    bdict = {8:[0,1], 9:[0,0], 10:[1,0],11:[1,1]}
+    return [bdict[len(p)] for p in peplist]
+
 
 def do_LEFT_encoding(peplist, m=5):
     """
