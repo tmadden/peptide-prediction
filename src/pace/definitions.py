@@ -133,7 +133,7 @@ class PredictionResult(NamedTuple):
 class Scorer(ABC):
     """
     an abstract base class defining the interface required of scorers - A scorer
-    quantifies (or summarizes) the accuracy of prediction results.
+    quantifies (or summarizes) the quality of the prediction results.
     """
 
     @abstractmethod
