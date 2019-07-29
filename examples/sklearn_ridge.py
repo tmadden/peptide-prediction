@@ -26,5 +26,5 @@ class RidgeAlgorithm(pace.PredictionAlgorithm):
         return self.clf.predict(encoded_x)
 
 numpy.random.seed(31415)
-scores = pace.evaluate(RidgeAlgorithm, selected_lengths=[9])
+scores = pace.evaluate(RidgeAlgorithm, selected_lengths=[9], selected_alleles=['B3501'])
 pprint.pprint(scores)

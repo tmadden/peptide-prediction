@@ -44,6 +44,7 @@ class PpvScorer(Scorer):
                             [r.prediction for r in results])
 
 
+
 def score_by_accuracy(truth, predictions, cutoff=0.5, binder_weight=0.5):
     """
     Score a set of predictions by their accuracy.
@@ -162,7 +163,7 @@ def stratified_split(samples, total_splits, training_filter, test_filter):
         yield (training_samples, test_samples)
 
 
-def score(algorithm, binders, nonbinders, scorers):
+def compute_results(algorithm, binders, nonbinders):
     # Combine the samples and pair them up with their truth values.
     paired_samples = list(
         zip(binders + nonbinders, [1] * len(binders) + [0] * len(nonbinders)))
@@ -172,12 +173,15 @@ def score(algorithm, binders, nonbinders, scorers):
     random.shuffle(paired_samples)
     # Ask the algorithm for predictions and score them.
     predictions = algorithm.predict(
-        [sample for sample, score in paired_samples])
+        [sample for sample, truth_value in paired_samples])
     # Construct the results.
-    results = [
-        PredictionResult(sample=sample, truth=score, prediction=prediction)
-        for (sample, score), prediction in zip(paired_samples, predictions)
+    return [
+        PredictionResult(sample=sample, truth=truth_value, prediction=prediction)
+        for (sample, truth_value), prediction in zip(paired_samples, predictions)
     ]
+    
+
+def score(results, scorers):
     # Invoke the scorers.
     return {label: s.score(results) for label, s in scorers.items()}
 
@@ -322,7 +326,11 @@ def evaluate(algorithm_class,
         SampleFilter(alleles=selected_alleles, lengths=selected_lengths),
         SampleFilter(alleles=test_alleles, lengths=test_lengths))
 
-    scores = {label: [] for label in scorers}
+    #scores = {label: [] for label in scorers}
+    fold_scores = {label: [] for label in scorers}
+    overall_scores = {label: 0.0 for label in scorers}
+    
+    all_fold_results = []
     for training_binders, test_binders in binder_split:
         training_nonbinders = generate_nonbinders(decoy_peptides_train,
                                                   training_binders, nbr_train)
@@ -335,8 +343,11 @@ def evaluate(algorithm_class,
         algorithm.train(training_binders, training_nonbinders)
 
         # Do the scoring and record the scores.
-        new_scores = score(algorithm, test_binders, test_nonbinders, scorers)
+        new_results = compute_results(algorithm, test_binders, test_nonbinders)
+        new_scores = score(new_results, scorers)
         for label in scorers.keys():
-            scores[label].append(new_scores[label])
-
-    return scores
+            fold_scores[label].append(new_scores[label])
+        # Save results from this fold.
+        all_fold_results.extend(new_results)
+    overall_scores = score(all_fold_results, scorers)
+    return {'folds': fold_scores, 'overall': overall_scores}

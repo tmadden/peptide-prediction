@@ -221,7 +221,8 @@ def test_simple_evaluation():
         folds=2,
         selected_lengths=[1, 2],
         nbr_test=1)
-    assert numpy.mean(boa_scores['accuracy']) == 0.5
+    assert numpy.mean(boa_scores['folds']['accuracy']) == 0.5
+    assert boa_scores['overall']['accuracy'] == 0.5
 
     # This algorithm thinks that any peptide starting with A-D binds.
     # Its accuracy depends on how we filter the samples.
@@ -238,7 +239,7 @@ def test_simple_evaluation():
         selected_lengths=[1, 2],
         nbr_test=1,
         folds=4)
-    assert 0.8 <= numpy.mean(lba_scores['accuracy']) <= 0.875
+    assert 0.8 <= numpy.mean(lba_scores['folds']['accuracy']) <= 0.875
 
     lba_scores = evaluate(
         LengthBasedAlgorithm,
@@ -247,7 +248,8 @@ def test_simple_evaluation():
         test_lengths=[2],
         nbr_test=1,
         folds=4)
-    assert numpy.mean(lba_scores['accuracy']) == 1
+    assert numpy.mean(lba_scores['folds']['accuracy']) == 1
+    assert lba_scores['overall']['accuracy'] == 1
 
     lba_scores = evaluate(
         LengthBasedAlgorithm,
@@ -256,7 +258,8 @@ def test_simple_evaluation():
         test_lengths=[1],
         nbr_test=1,
         folds=2)
-    assert numpy.mean(lba_scores['accuracy']) == 0.5
+    assert numpy.mean(lba_scores['folds']['accuracy']) == 0.5
+    assert lba_scores['overall']['accuracy'] == 0.5
 
 
 def test_evaluation_splitting():
