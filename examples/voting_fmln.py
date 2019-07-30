@@ -51,7 +51,7 @@ class voting_fmln(pace.PredictionAlgorithm):
                  RandomForestClassifier(n_estimators=30,
                                         max_depth=None,
                                         random_state=np.random.seed(1234))
-                 )  #for reproduceable results set random_state
+                 )  #for reproduceable results set random_state. note sklearn uses numpy.random, pace splitting uses random
             ],
             voting='soft')
         self.clf.fit(encoded_x, y)
@@ -62,6 +62,8 @@ class voting_fmln(pace.PredictionAlgorithm):
         r = self.clf.predict_proba(encoded_x)
         return r[:, 1]
 
+import logging
+logging.basicConfig(level=logging.INFO)
 
 #shortcuts:
 a02 = ['A0203']
@@ -69,11 +71,60 @@ a68 = ['A6802']
 b35 = ['B3501']
 #my_scorers = {'ppv': pace.evaluation.PpvScorer(), 'accuracy': pace.evaluation.AccuracyScorer(cutoff=0.6)}
 
+#single call:
+'''
 scores = pace.evaluate(lambda: voting_fmln(5, 4, encoding_style='one_hot'),
                        selected_lengths=[9],
                        selected_alleles=b35,
                        dataset=pace.data.load_dataset(16),
-                       nbr_train=10,
-                       nbr_test=1000)
-#pinot noir: 10, 1000
+                       nbr_train=1,
+                       nbr_test=10,
+                       random_seed=1)
+#note: pinot noir values for nbr_train and nbr_test: 10, 1000
 pprint.pprint(scores)
+'''
+
+import multiprocessing
+
+#wrapper function for pace.evaluate call:
+def worker(rseed, return_dict):
+    scores = pace.evaluate(lambda: voting_fmln(5, 4, encoding_style='one_hot'),
+                       selected_lengths=[9],
+                       selected_alleles=b35,
+                       dataset=pace.data.load_dataset(16),
+                       nbr_train=10,
+                       nbr_test=1000,
+                       random_seed=rseed)
+    return_dict[rseed] = scores
+
+#choose the set of random seeds
+rseeds = range(10)
+
+manager = multiprocessing.Manager()
+return_dict = manager.dict()
+jobs = []
+
+#run jobs in parallel
+for rs in rseeds:
+    p = multiprocessing.Process(target=worker, args=(rs,return_dict))
+    jobs.append(p)
+    p.start()
+
+#wait for all runs to finish:
+for proc in jobs:
+    proc.join()
+
+#aggregate/summarize the results
+#print (return_dict.keys())
+#print (return_dict.values())
+
+ppv_values = []
+for r in return_dict.keys():
+    s = return_dict[r]
+    ppv_values.append(s['overall']['ppv'])
+
+mean_ppv = np.mean(ppv_values)
+std_ppv = np.std(ppv_values)
+
+print("Mean ppv is {:.2f}".format(mean_ppv))
+print('Stdev of ppv is {:.2f}'.format(std_ppv))

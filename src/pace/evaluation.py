@@ -5,6 +5,7 @@ import itertools
 from pace.definitions import *
 from pace.data import load_dataset
 from typing import NamedTuple, Optional, Set
+import logging
 
 
 def score_by_ppv(truth, predictions, top_n=None):
@@ -337,7 +338,7 @@ def evaluate(algorithm_class,
     all_fold_results = []
     foldi = 1
     for training_binders, test_binders in binder_split:
-        print('In fold ' + str(foldi))
+        logging.info('In fold ' + str(foldi))
         foldi += 1
         training_nonbinders = generate_nonbinders(decoy_peptides_train,
                                                   training_binders, nbr_train)
