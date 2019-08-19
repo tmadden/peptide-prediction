@@ -122,9 +122,11 @@ ppv_values = []
 for r in return_dict.keys():
     s = return_dict[r]
     ppv_values.append(s['overall']['ppv'])
+    print(s['overall']['ppv'])
 
 mean_ppv = np.mean(ppv_values)
 std_ppv = np.std(ppv_values)
+
 
 print("Mean ppv is {:.2f}".format(mean_ppv))
 print('Stdev of ppv is {:.2f}'.format(std_ppv))
