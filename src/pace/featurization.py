@@ -9,6 +9,36 @@ def do_FMLN_encoding(peplist, m=8, n=3):
     return [p[0:m] + p[-n:] for p in peplist]
 
 
+def do_variable_length_one_hot_encoding(peplist):
+    """
+    Use this one when peplist has peptides of varying lengths.
+    :param peplist: the list of peptides to encode
+    :returns: encoded peptide list
+    """
+    import copy
+    import pace.sklearn
+    xp = copy.deepcopy(peplist)
+
+    for i in range(len(peplist)):
+        for j in range(11 - len(peplist[i])):
+            xp[i].append('A')
+
+    encoder = pace.sklearn.create_one_hot_encoder(len(xp[0]))
+    encoder.fit(xp)
+    xenc = encoder.transform(xp).toarray()
+
+    xencstrip = [[] for i in range(len(peplist))]
+
+    #now strip off the padding
+    for i in range(len(peplist)):
+        if len(peplist[i]) < 11:
+            xencstrip[i] = xenc[i, :(-(11 - len(peplist[i])) * 20)]
+        else:
+            xencstrip[i] = xenc[i, :]
+
+    return xencstrip
+
+
 def do_5d_encoding(peplist):
     """
     5D encoding using amino acid multi dimensional scaling properties
