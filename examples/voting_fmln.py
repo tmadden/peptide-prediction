@@ -62,6 +62,7 @@ class voting_fmln(pace.PredictionAlgorithm):
         r = self.clf.predict_proba(encoded_x)
         return r[:, 1]
 
+'''
 import logging
 logging.basicConfig(level=logging.INFO)
 
@@ -72,7 +73,7 @@ b35 = ['B3501']
 #my_scorers = {'ppv': pace.evaluation.PpvScorer(), 'accuracy': pace.evaluation.AccuracyScorer(cutoff=0.6)}
 
 #single call:
-'''
+
 scores = pace.evaluate(lambda: voting_fmln(5, 4, encoding_style='one_hot'),
                        selected_lengths=[9],
                        selected_alleles=b35,
@@ -82,7 +83,7 @@ scores = pace.evaluate(lambda: voting_fmln(5, 4, encoding_style='one_hot'),
                        random_seed=1)
 #note: pinot noir values for nbr_train and nbr_test: 10, 1000
 pprint.pprint(scores)
-'''
+
 
 import multiprocessing
 
@@ -130,3 +131,4 @@ std_ppv = np.std(ppv_values)
 
 print("Mean ppv is {:.2f}".format(mean_ppv))
 print('Stdev of ppv is {:.2f}'.format(std_ppv))
+'''
