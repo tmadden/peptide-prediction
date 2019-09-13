@@ -9,9 +9,11 @@ from pkg_resources import resource_stream
 
 logging.basicConfig(level=logging.INFO)
 
-#this is our first search: "single" mode. just basic runs for all allele/lengths.
-#we run and store separately NN (DJRSD) and Voting.
-#both sets of results are stored to csv files.
+#here we don't change looping structure at all, but we train pan length in the following fixed way:
+# 8 mers are trained with 8 and 9 mers
+# 9 mers are trained with 8,9,10 mers
+# 10 mers are trained with 9,10,11 mers
+# 11 mers are trained with 10,11 mers
 
 
 #wrapper function for pace.evaluate call:
@@ -42,6 +44,8 @@ def worker(test_allele, train_alleles, test_length, train_lengths, fmln_m,
     return_dict[rseed + 100] = scoresVOTING
 
 
+flists = [[8, 9], [8, 9, 10], [9, 10, 11], [10, 11]]
+
 #choose the set of random seeds
 rseeds = range(10)
 
@@ -52,6 +56,8 @@ import pace.data
 alleles = list(
     pace.data.read_alleles_file(
         resource_stream("pace", "data/alleles_95.txt")))
+
+#alleles = ['B5101', 'B5401']
 
 lengths = [8, 9, 10, 11]
 
@@ -70,13 +76,14 @@ for ia in range(len(alleles)):
 
         #def worker(test_allele, train_alleles, test_length, train_lengths, fmln_m,
         #   fmln_n, rseed, return_dict):
-
+        print('running ' + str(lengths[il]) + ' with training lengths:')
+        print(flists[il])
         #run jobs in parallel
         for rs in rseeds:
             p = multiprocessing.Process(
                 target=worker,
-                args=([alleles[ia]], [alleles[ia]], [lengths[il]],
-                      [lengths[il]], m, n, rs, return_dict))
+                args=([alleles[ia]], [alleles[ia]], [lengths[il]], flists[il],
+                      m, n, rs, return_dict))
             jobs.append(p)
             p.start()
 
@@ -110,7 +117,7 @@ for ia in range(len(alleles)):
         meanppvVOTING[ia, il] = mean_ppvVOTING
         stdppvVOTING[ia, il] = std_ppvVOTING
 
-np.savetxt('mean_ppv_nn.csv', meanppvNN)
-np.savetxt('mean_ppv_voting.csv', meanppvVOTING)
-np.savetxt('std_ppv_nn.csv', stdppvNN)
-np.savetxt('std_ppv_voting.csv', stdppvVOTING)
+np.savetxt('mean_ppv_nn_fmln.csv', meanppvNN)
+np.savetxt('mean_ppv_voting_fmln.csv', meanppvVOTING)
+np.savetxt('std_ppv_nn_fmln.csv', stdppvNN)
+np.savetxt('std_ppv_voting_fmln.csv', stdppvVOTING)
