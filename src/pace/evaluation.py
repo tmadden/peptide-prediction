@@ -162,7 +162,7 @@ def stratified_split(samples, total_splits, training_filter, test_filter):
         yield (training_samples, test_samples)
 
 
-def score(algorithm, binders, nonbinders, scorers):
+def compute_results(algorithm, binders, nonbinders):
     # Combine the samples and pair them up with their truth values.
     paired_samples = list(
         zip(binders + nonbinders, [1] * len(binders) + [0] * len(nonbinders)))
@@ -172,12 +172,17 @@ def score(algorithm, binders, nonbinders, scorers):
     random.shuffle(paired_samples)
     # Ask the algorithm for predictions and score them.
     predictions = algorithm.predict(
-        [sample for sample, score in paired_samples])
+        [sample for sample, truth_value in paired_samples])
     # Construct the results.
-    results = [
-        PredictionResult(sample=sample, truth=score, prediction=prediction)
-        for (sample, score), prediction in zip(paired_samples, predictions)
+    return [
+        PredictionResult(
+            sample=sample, truth=truth_value, prediction=prediction)
+        for (sample,
+             truth_value), prediction in zip(paired_samples, predictions)
     ]
+
+
+def score(results, scorers):
     # Invoke the scorers.
     return {label: s.score(results) for label, s in scorers.items()}
 
@@ -186,7 +191,9 @@ def generate_nonbinders(decoy_peptides, binders, nonbinder_ratio):
     nonbinders = []
     for (allele, length), samples in partition_samples(binders).items():
         nonbinder_count = int(len(samples) * nonbinder_ratio)
-        for i in random.choices(list(range(0, len(decoy_peptides[length]))), k=nonbinder_count):
+        for i in random.choices(
+                list(range(0, len(decoy_peptides[length]))),
+                k=nonbinder_count):
             nonbinders.append(
                 Sample(allele=allele, peptide=decoy_peptides[length][i]))
     return nonbinders
@@ -275,7 +282,7 @@ def evaluate(algorithm_class,
         ``pace.evaluation.default_scorers`` is used.
 
     random_seed : int, optional
-        the random seed used to initialize the random state to ensure 
+        the random seed used to initialize the random state to ensure
         reproducible splits are obtained between different runs
 
     Returns
@@ -312,9 +319,13 @@ def evaluate(algorithm_class,
     decoy_peptides_test = {}
     for length in all_lengths:
         decoys = dataset.get_nonbinders(length)
-        train_test_split_mask = random.choices([0,1], k=len(decoys))
-        decoy_peptides_train[length] = [d for (d, b) in zip(decoys, train_test_split_mask) if b]
-        decoy_peptides_test[length] = [d for (d, b) in zip(decoys, train_test_split_mask) if not b]
+        train_test_split_mask = random.choices([0, 1], k=len(decoys))
+        decoy_peptides_train[length] = [
+            d for (d, b) in zip(decoys, train_test_split_mask) if b
+        ]
+        decoy_peptides_test[length] = [
+            d for (d, b) in zip(decoys, train_test_split_mask) if not b
+        ]
 
     random.shuffle(binders)
     binder_split = stratified_split(
@@ -322,21 +333,25 @@ def evaluate(algorithm_class,
         SampleFilter(alleles=selected_alleles, lengths=selected_lengths),
         SampleFilter(alleles=test_alleles, lengths=test_lengths))
 
-    scores = {label: [] for label in scorers}
+    fold_scores = {label: [] for label in scorers}
+    all_fold_results = []
     for training_binders, test_binders in binder_split:
         training_nonbinders = generate_nonbinders(decoy_peptides_train,
                                                   training_binders, nbr_train)
 
-        test_nonbinders = generate_nonbinders(decoy_peptides_test, test_binders,
-                                              nbr_test)
+        test_nonbinders = generate_nonbinders(decoy_peptides_test,
+                                              test_binders, nbr_test)
 
         # Create a fresh algorithm instance and train it.
         algorithm = algorithm_class()
         algorithm.train(training_binders, training_nonbinders)
 
         # Do the scoring and record the scores.
-        new_scores = score(algorithm, test_binders, test_nonbinders, scorers)
+        new_results = compute_results(algorithm, test_binders, test_nonbinders)
+        new_scores = score(new_results, scorers)
         for label in scorers.keys():
-            scores[label].append(new_scores[label])
-
-    return scores
+            fold_scores[label].append(new_scores[label])
+        # Save results from this fold.
+        all_fold_results.extend(new_results)
+    overall_scores = score(all_fold_results, scorers)
+    return {'folds': fold_scores, 'overall': overall_scores}
