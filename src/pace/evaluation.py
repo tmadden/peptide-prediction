@@ -176,9 +176,8 @@ def compute_results(algorithm, binders, nonbinders):
         [sample for sample, truth_value in paired_samples])
     # Construct the results.
     return [
-        PredictionResult(sample=sample,
-                         truth=truth_value,
-                         prediction=prediction)
+        PredictionResult(
+            sample=sample, truth=truth_value, prediction=prediction)
         for (sample,
              truth_value), prediction in zip(paired_samples, predictions)
     ]
@@ -193,8 +192,9 @@ def generate_nonbinders(decoy_peptides, binders, nonbinder_ratio):
     nonbinders = []
     for (allele, length), samples in partition_samples(binders).items():
         nonbinder_count = int(len(samples) * nonbinder_ratio)
-        for i in random.choices(list(range(0, len(decoy_peptides[length]))),
-                                k=nonbinder_count):
+        for i in random.choices(
+                list(range(0, len(decoy_peptides[length]))),
+                k=nonbinder_count):
             nonbinders.append(
                 Sample(allele=allele, peptide=decoy_peptides[length][i]))
     return nonbinders
@@ -338,7 +338,8 @@ def evaluate(algorithm_class,
     all_fold_results = []
     foldi = 1
     for training_binders, test_binders in binder_split:
-        logging.info('In fold ' + str(foldi))
+        logging.info('In fold ' + str(foldi) + ' num training binders=' +
+                     str(len(training_binders)))
         foldi += 1
         training_nonbinders = generate_nonbinders(decoy_peptides_train,
                                                   training_binders, nbr_train)

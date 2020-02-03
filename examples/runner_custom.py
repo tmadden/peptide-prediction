@@ -1,5 +1,5 @@
-from DonJulioNoir import DJRSD, DJRSDfmln
-from voting_fmln import voting_fmln
+from pan_length_stackdown import pan_length_rsd
+from customA0203length9 import DJRSDfmln
 import numpy as np
 import logging
 import pace
@@ -16,36 +16,25 @@ a68 = ['A6802']
 b35 = ['B3501']
 a31 = ['A3101']
 
-a24 = ['A0204']
-a24t = ['A0203', 'A0204']
-
-b4403 = ['B4403']
-b4403t = ['B4402', 'B4403']
-
-b5802 = ['B5802']
-b5802t = ['B5801', 'B5802']
-
 
 #wrapper function for pace.evaluate call:
 def worker(rseed, return_dict):
     scores = pace.evaluate(
-        #DJRSD,
-        #lambda: voting_fmln(5, 4, encoding_style='one_hot'),
         lambda: DJRSDfmln(5, 4, encoding_style='one_hot'),
-        selected_lengths=[9, 10],
-        #selected_lengths=[10],
-        selected_alleles=b5802t,
-        test_alleles=b5802,
+        #lambda: pan_length_rsd(encoding_style='one_hot'),
+        selected_lengths=[9, 10, 11],
+        selected_alleles=a31,
+        test_alleles=a31,
         test_lengths=[10],
-        dataset=pace.data.load_dataset(95),
+        dataset=pace.data.load_dataset(16),
         nbr_train=10,
         nbr_test=1000,
-        random_seed=rseed * 3)
+        random_seed=rseed)
     return_dict[rseed] = scores
 
 
 #choose the set of random seeds
-rseeds = range(24)
+rseeds = range(10)
 
 manager = multiprocessing.Manager()
 return_dict = manager.dict()

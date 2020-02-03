@@ -9,7 +9,7 @@ from pkg_resources import resource_stream
 
 logging.basicConfig(level=logging.INFO)
 
-#in matlab using similarity of logo plots I made neighbor lists. see logoSimilarities.m
+#in matlab using similarity of logo plots I made neightbor lists. see logoSimilarities.m
 #using a cutoff of 1, not all alleles have neighbors, but most do
 nd = {'A0101': ['A3601']}
 nd.update({'A0201': ['A0202', 'A0203']})
@@ -110,6 +110,8 @@ def worker(test_allele, train_alleles, test_length, train_lengths, fmln_m,
     #return_dict[rseed + 100] = scoresVOTING
 
 
+flists = [[8, 9], [8, 9, 10], [9, 10, 11], [10, 11]]
+
 #choose the set of random seeds
 rseeds = range(10)
 
@@ -144,12 +146,14 @@ for ia in range(len(alleles)):
         return_dict = manager.dict()
         jobs = []
 
+        print('length ' + str(lengths[il]) + ' with training lengths:')
+        print(flists[il])
         #run jobs in parallel
         for rs in rseeds:
             p = multiprocessing.Process(
                 target=worker,
                 args=([alleles[ia]], my_training_alleles, [lengths[il]],
-                      [lengths[il]], m, n, rs, return_dict))
+                      flists[il], m, n, rs, return_dict))
             jobs.append(p)
             p.start()
 
@@ -184,12 +188,12 @@ for ia in range(len(alleles)):
         meanppvVOTING[ia, il] = mean_ppvVOTING
         stdppvVOTING[ia, il] = std_ppvVOTING
         '''
-    np.savetxt('mean_ppv_nn_neighbor_allelesALONGTHEWAY.csv', meanppvNN)
+    np.savetxt('mean_ppv_nn_bothALONGTHEWAY.csv', meanppvNN)
 
     #np.savetxt('mean_ppv_voting_neighbor_allelesALONGTHEWAY.csv',
     #           meanppvVOTING)
 
-np.savetxt('mean_ppv_nn_neighbor_alleles.csv', meanppvNN)
+np.savetxt('mean_ppv_nn_both.csv', meanppvNN)
 #np.savetxt('mean_ppv_voting_neighbor_alleles.csv', meanppvVOTING)
-np.savetxt('std_ppv_nn_neighbor_alleles.csv', stdppvNN)
+np.savetxt('std_ppv_nn_both.csv', stdppvNN)
 #np.savetxt('std_ppv_voting_neighbor_alleles.csv', stdppvVOTING)

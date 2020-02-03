@@ -1,0 +1,3 @@
+#python examples/master_loop_search.py
+python examples/master_loop_search_single_fmln.py
+#python examples/master_loop_search_neighbor_alleles.py

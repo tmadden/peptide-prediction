@@ -9,7 +9,7 @@ from pkg_resources import resource_stream
 
 logging.basicConfig(level=logging.INFO)
 
-#in matlab using similarity of logo plots I made neighbor lists. see logoSimilarities.m
+#in matlab using similarity of logo plots I made neightbor lists. see logoSimilarities.m
 #using a cutoff of 1, not all alleles have neighbors, but most do
 nd = {'A0101': ['A3601']}
 nd.update({'A0201': ['A0202', 'A0203']})
@@ -78,18 +78,6 @@ nd.update({'C1601': ['B4601', 'C0202', 'C0302', 'C1202', 'C1203']})
 nd.update({'G0101': ['G0103', 'G0104']})
 nd.update({'G0103': ['G0101', 'G0104']})
 nd.update({'G0104': ['G0101', 'G0103']})
-'''
-    scoresVOTING = pace.evaluate(
-        lambda: voting_fmln(fmln_m, fmln_n, encoding_style='one_hot'),
-        selected_lengths=train_lengths,
-        selected_alleles=train_alleles,
-        test_alleles=test_allele,
-        test_lengths=test_length,
-        dataset=pace.data.load_dataset(95),
-        nbr_train=10,
-        nbr_test=1000,
-        random_seed=rseed)
-'''
 
 
 #wrapper function for pace.evaluate call:
@@ -105,14 +93,25 @@ def worker(test_allele, train_alleles, test_length, train_lengths, fmln_m,
         nbr_train=10,
         nbr_test=1000,
         random_seed=rseed)
+    scoresVOTING = pace.evaluate(
+        lambda: voting_fmln(fmln_m, fmln_n, encoding_style='one_hot'),
+        selected_lengths=train_lengths,
+        selected_alleles=train_alleles,
+        test_alleles=test_allele,
+        test_lengths=test_length,
+        dataset=pace.data.load_dataset(95),
+        nbr_train=10,
+        nbr_test=1000,
+        random_seed=rseed)
 
     return_dict[rseed] = scoresDJRSD
-    #return_dict[rseed + 100] = scoresVOTING
+    return_dict[rseed + 100] = scoresVOTING
 
 
 #choose the set of random seeds
 rseeds = range(10)
 
+#do i need to put this inside the loops?
 manager = multiprocessing.Manager()
 
 import pace.data
@@ -135,61 +134,4 @@ for ia in range(len(alleles)):
         my_training_alleles = [alleles[ia]] + nd.get(alleles[ia])
 
     print('running allele ' + alleles[ia])
-    print('with training alleles ' + str(my_training_alleles))
-
-    for il in range(len(lengths)):
-        m = 4
-        n = lengths[il] - m
-
-        return_dict = manager.dict()
-        jobs = []
-
-        #run jobs in parallel
-        for rs in rseeds:
-            p = multiprocessing.Process(
-                target=worker,
-                args=([alleles[ia]], my_training_alleles, [lengths[il]],
-                      [lengths[il]], m, n, rs, return_dict))
-            jobs.append(p)
-            p.start()
-
-        #wait for all runs to finish:
-        for proc in jobs:
-            proc.join()
-
-        ppv_valuesNN = []
-        #ppv_valuesVOTING = []
-
-        for r in return_dict.keys():
-            s = return_dict[r]
-            if r < 90:
-                ppv_valuesNN.append(s['overall']['ppv'])
-            else:
-                #ppv_valuesVOTING.append(s['overall']['ppv'])
-                pass
-
-        print("allele " + alleles[ia] + ", length " + str(lengths[il]))
-
-        mean_ppvNN = np.mean(ppv_valuesNN)
-        std_ppvNN = np.std(ppv_valuesNN)
-        print("  Mean ppv NN is {:.2f}".format(mean_ppvNN))
-        print("  Stdev of ppv NN is {:.3f}".format(std_ppvNN))
-        meanppvNN[ia, il] = mean_ppvNN
-        stdppvNN[ia, il] = std_ppvNN
-        '''
-        mean_ppvVOTING = np.mean(ppv_valuesVOTING)
-        std_ppvVOTING = np.std(ppv_valuesVOTING)
-        print("  Mean ppv VOTING is {:.2f}".format(mean_ppvVOTING))
-        print("  Stdev of ppv VOTING is {:.3f}".format(std_ppvVOTING))
-        meanppvVOTING[ia, il] = mean_ppvVOTING
-        stdppvVOTING[ia, il] = std_ppvVOTING
-        '''
-    np.savetxt('mean_ppv_nn_neighbor_allelesALONGTHEWAY.csv', meanppvNN)
-
-    #np.savetxt('mean_ppv_voting_neighbor_allelesALONGTHEWAY.csv',
-    #           meanppvVOTING)
-
-np.savetxt('mean_ppv_nn_neighbor_alleles.csv', meanppvNN)
-#np.savetxt('mean_ppv_voting_neighbor_alleles.csv', meanppvVOTING)
-np.savetxt('std_ppv_nn_neighbor_alleles.csv', stdppvNN)
-#np.savetxt('std_ppv_voting_neighbor_alleles.csv', stdppvVOTING)
+    #print('with training alleles ' + str(my_training_alleles))
