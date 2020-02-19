@@ -1,13 +1,12 @@
-import pace, pace.sklearn
-import sklearn.linear_model
+import pace, pace.featurization
 import pprint
+import numpy as np
 
 import keras
-import numpy as np
 from keras.models import Sequential, Model
 from keras.layers import Input, Dense, Dropout
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
-from keras.utils import np_utils
+
 
 # Make sure the model is reproducible
 from numpy.random import seed
@@ -16,6 +15,10 @@ from tensorflow import set_random_seed
 set_random_seed(1231)
 
 class DonJulioBlanco(pace.PredictionAlgorithm):
+    
+    def __init__(self):
+        self.encoding_name = 'onehot'
+
     ### Define Model
     def create_model_1D(self, dim_1D, n_hidden_1, dropout_rate):
         model = Sequential()
@@ -36,10 +39,8 @@ class DonJulioBlanco(pace.PredictionAlgorithm):
              for s in binders] + [list(s.peptide) for s in nonbinders]
         y = [1] * len(binders) + [0] * len(nonbinders)
         
-        encoder = pace.sklearn.create_one_hot_encoder(9)
-        encoder.fit(x)
-        encoded_x = encoder.transform(x).toarray()
-        dim_1D = len(encoder.categories_)*20
+        encoded_x = pace.featurization.encode(x, self.encoding_name)
+        dim_1D = encoded_x.shape[1]
         
         ### Model params
         nEpochs = 15 
@@ -49,11 +50,11 @@ class DonJulioBlanco(pace.PredictionAlgorithm):
         patience_lr = 2
         patience_es = 4
         callbacks = self.get_callbacks(patience_lr, patience_es)
-
+        
         ### Train model
         model = None
         model = self.create_model_1D(dim_1D, n_hidden_1, dropout_rate)
-        model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])        
+        model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
         model.fit(x = encoded_x, y = y,
                 verbose=0,
                 batch_size=batch_size, 
@@ -67,25 +68,20 @@ class DonJulioBlanco(pace.PredictionAlgorithm):
     
     def predict(self, samples):
         x = [list(s.peptide) for s in samples]
-        
-        encoder = pace.sklearn.create_one_hot_encoder(9)
-        encoder.fit(x)
-        encoded_x = encoder.transform(x).toarray()
-        
+        encoded_x = pace.featurization.encode(x, self.encoding_name)
         return self.model.predict(encoded_x).squeeze()
 
 
 
-### Evaluate our algorithm using PACE.
+### Evaluate algorithm using PACE.
 alleles = ['A0203', 'A6802', 'B3501']
 for allele in alleles:
     eval_results = pace.evaluate(DonJulioBlanco,
-                                selected_lengths=[9], 
-                                selected_alleles=[allele], 
-                                dataset=pace.data.load_dataset(16), 
-                                nbr_train=10, nbr_test=1000)
+                                 selected_lengths=[9], 
+                                 selected_alleles=[allele], 
+                                 dataset=pace.data.load_dataset(16), 
+                                 nbr_train=10, nbr_test=1000)
     print(allele)
-    print('   PPV: ' + str(eval_results["ppv"]))
-    print('   mean PPV: ' + str(np.average(eval_results["ppv"])))
-    
+    pprint.pprint(eval_results)
+
 

@@ -4,6 +4,7 @@ __version__ = _pgk_resources.require("pace")[0].version
 
 # Import the package-level API.
 from .evaluation import evaluate
+from .featurization import encode, get_allele_similarity_mat, get_similar_alleles
 from .definitions import *
 
 # Since this is a package, we need to explicitly tell Python that we want our

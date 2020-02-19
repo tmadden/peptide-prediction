@@ -4,13 +4,18 @@ from typing import NamedTuple
 # All public definitions from this module are exposed as part of the package-
 # level API for PACE, so it's important to keep the list clean.
 __all__ = [
-    'amino_acids', 'peptide_lengths', 'Sample', 'Dataset',
+    'amino_acids', 'peptide_lengths', 'builtin_peptide_encodings',
+    'Sample', 'Dataset',
     'PredictionAlgorithm', 'PredictionResult', 'Scorer'
 ]
 
 amino_acids = "ACDEFGHIKLMNPQRSTVWY"
 
 peptide_lengths = [8, 9, 10, 11]
+
+builtin_peptide_encodings = ["onehot", "binary", "BLOSUM62", "PMBEC", "AAPropsPCA"]
+
+builtin_allele_similarities = ["motifs", "pockets"]
 
 
 class Sample(NamedTuple):
