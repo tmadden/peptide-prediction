@@ -1,4 +1,4 @@
-import pace, pace.featurization
+import pace, pace.sklearn, pace.featurization
 import pprint
 import numpy as np
 
@@ -16,8 +16,8 @@ set_random_seed(1231)
 
 class DonJulioBlanco(pace.PredictionAlgorithm):
     
-    def __init__(self):
-        self.encoding_name = 'onehot'
+    def __init__(self, encoding_name='onehot'):
+        self.encoding_name = encoding_name
 
     ### Define Model
     def create_model_1D(self, dim_1D, n_hidden_1, dropout_rate):
@@ -35,8 +35,8 @@ class DonJulioBlanco(pace.PredictionAlgorithm):
     
     def train(self, binders, nonbinders):
         ### Data prep
-        x = [list(s.peptide)
-             for s in binders] + [list(s.peptide) for s in nonbinders]
+        x = [list(s.peptide) for s in binders] + \
+            [list(s.peptide) for s in nonbinders]
         y = [1] * len(binders) + [0] * len(nonbinders)
         
         encoded_x = pace.featurization.encode(x, self.encoding_name)
@@ -74,13 +74,13 @@ class DonJulioBlanco(pace.PredictionAlgorithm):
 
 
 ### Evaluate algorithm using PACE.
-alleles = ['A0203', 'A6802', 'B3501']
+alleles = ['A0203']
 for allele in alleles:
-    eval_results = pace.evaluate(DonJulioBlanco,
+    eval_results = pace.evaluate(lambda: DonJulioBlanco('onehot'),
                                  selected_lengths=[9], 
                                  selected_alleles=[allele], 
                                  dataset=pace.data.load_dataset(16), 
-                                 nbr_train=10, nbr_test=1000)
+                                 nbr_train=1, nbr_test=10)
     print(allele)
     pprint.pprint(eval_results)
 

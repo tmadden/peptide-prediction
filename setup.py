@@ -8,7 +8,8 @@ setup(
     tests_require=["pytest", "pytest-cov", "scikit-learn>=0.20"],
     extras_require={
         "sklearn": ["scikit-learn>=0.20"],
-        "docs": ["sphinx"]
+        "docs": ["sphinx"],
+        "keras": ["keras>=2.2.4"],
     },
     packages=["pace"],
     package_dir={"": "src"},
