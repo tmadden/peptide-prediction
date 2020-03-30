@@ -9,7 +9,7 @@ setup(
     extras_require={
         "sklearn": ["scikit-learn>=0.20"],
         "docs": ["sphinx"],
-        "keras": ["keras>=2.2.4"],
+        "keras": ["keras>=2.2.4"]
     },
     packages=["pace"],
     package_dir={"": "src"},
