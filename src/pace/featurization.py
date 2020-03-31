@@ -70,7 +70,7 @@ def encode(sequences, aafeatmat="onehot"):
     aafeatmat = aafeatmat.loc[list(amino_acids),:]
     # Block diagnoal aafeatmat
     aafeatmat_bd = np.kron(np.eye(pep_len, dtype=int), aafeatmat)
-    # Feature encoding 
-    return encoded * np.asmatrix(aafeatmat_bd)
+    # Feature encoding (@ matrix multiplication)
+    return encoded @ aafeatmat_bd 
 
 
