@@ -3,10 +3,9 @@ python:
   - 3.6
 install:
   - pip install codecov
-  - pip install keras
 script:
   - python setup.py test
-  - pip install .[sklearn]
+  - pip install -r requirements.txt
   - examples/run_all.sh
 after_success:
   - codecov
