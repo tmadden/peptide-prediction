@@ -4,7 +4,7 @@ setup(
     name="pace",
     python_requires=">=3.6",
     setup_requires=["pytest-runner", "setuptools-git-version"],
-    install_requires=["numpy"],
+    install_requires=["numpy", "pandas"],
     tests_require=["pytest", "pytest-cov", "scikit-learn>=0.20"],
     extras_require={
         "sklearn": ["scikit-learn>=0.20"],

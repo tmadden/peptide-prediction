@@ -5,7 +5,7 @@ install:
   - pip install codecov
 script:
   - python setup.py test
-  - pip install .[sklearn]
+  - pip install -r ./examples/requirements.txt
   - examples/run_all.sh
 after_success:
   - codecov
