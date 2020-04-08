@@ -18,7 +18,7 @@ def worker(test_allele, train_alleles, test_length, train_lengths, fmln_m,
         selected_alleles=train_alleles,
         test_alleles=test_allele,
         test_lengths=test_length,
-        dataset=pace.data.load_dataset(95),
+        dataset=pace.data.load_dataset(16),
         nbr_train=10,
         nbr_test=1000,
         random_seed=rseed)
@@ -34,7 +34,8 @@ manager = multiprocessing.Manager()
 import pace.data
 alleles = list(
     pace.data.read_alleles_file(
-        resource_stream("pace", "data/alleles_95.txt")))
+        #note if you change 16 to 95 gotta change it above too.
+        resource_stream("pace", "data/alleles_16.txt")))
 
 lengths = [8, 9, 10, 11]
 
