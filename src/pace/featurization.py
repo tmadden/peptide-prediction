@@ -68,7 +68,7 @@ def encode(sequences, aafeatmat="onehot"):
     # This enables efficient transfprmation to other encodings 
     # by multiplication (below).
     aafeatmat = aafeatmat.loc[list(amino_acids),:]
-    # Block diagnoal aafeatmat
+    # Block diagonal aafeatmat
     aafeatmat_bd = np.kron(np.eye(pep_len, dtype=int), aafeatmat)
     # Feature encoding (@ matrix multiplication)
     return encoded @ aafeatmat_bd 
