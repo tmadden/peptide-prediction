@@ -93,3 +93,9 @@ def test_encode():
          -1., -3., -2., -3., -2., -2., -2., -3., -2., -1., -2., -3.,  2.,
          -1., -1., -2., -1.,  3., -3., -2., -2.,  2.,  7., -1.
     ])
+
+def test_FMLN_encoding():
+
+    peptides = ['ACDEFGIKL', 'MNPQRSTV']
+    assert pace.featurization.do_FMLN_encoding(peptides, m=3,
+                                               n=2) == ['ACDKL', 'MNPTV']
