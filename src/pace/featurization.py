@@ -76,11 +76,28 @@ def encode(sequences, aafeatmat="onehot"):
 
 def do_FMLN_encoding(peplist, m=8, n=3):
     """
-    First m last n. e.g. for FELT encoding, the default, m=8, n=3
-    :param peplist: the list of peptides to encode
-    :param m: use the first m residues
-    :param n: concatenated with the last n residues
-    :returns: encoded peptide list
+    Does 'First m last n' encoding. The default is first 8 amino 
+    acids and last 3.
+
+    Parameters
+    ----------
+    sequences
+        List of peptide sequences. A list of strings is accepted as well 
+        as a list of lists where the inner lists are single amino acids. 
+        Peptide sequences do not need to be the same length.
+
+    m
+        The number of amino acid letters to take from the left part of 
+        the aa string
+    n
+        The number of amino acid letters to take from the right part of 
+        the aa string
+
+    Returns
+    -------
+    list
+        aa sequences
     """
+
     return [p[0:m] + p[-n:] for p in peplist]
 
