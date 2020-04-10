@@ -4,8 +4,7 @@ import pace
 from pace.definitions import amino_acids, builtin_aa_encodings, builtin_allele_similarities
 from pace.sklearn import create_one_hot_encoder
 from pkg_resources import resource_stream
-
-
+    
 def load_aafeatmat(aafeatmat_name):
     aafeatmat = pd.read_csv(
         resource_stream("pace", "data/aafeatmat_{}.txt".format(aafeatmat_name)),
@@ -65,7 +64,7 @@ def encode(sequences, aafeatmat="onehot"):
         aafeatmat = load_aafeatmat(aafeatmat)
     # Ensure the rows have the same order of amino acids as 
     # amino_acids in pace.definitions (and onehot encoding). 
-    # This enables efficient transfprmation to other encodings 
+    # This enables efficient transformation to other encodings 
     # by multiplication (below).
     aafeatmat = aafeatmat.loc[list(amino_acids),:]
     # Block diagonal aafeatmat
@@ -73,4 +72,32 @@ def encode(sequences, aafeatmat="onehot"):
     # Feature encoding (@ matrix multiplication)
     return encoded @ aafeatmat_bd 
 
+
+
+def do_FMLN_encoding(peplist, m=8, n=3):
+    """
+    Does 'First m last n' encoding. The default is first 8 amino 
+    acids and last 3.
+
+    Parameters
+    ----------
+    sequences
+        List of peptide sequences. A list of strings is accepted as well 
+        as a list of lists where the inner lists are single amino acids. 
+        Peptide sequences do not need to be the same length.
+
+    m
+        The number of amino acid letters to take from the left part of 
+        the aa string
+    n
+        The number of amino acid letters to take from the right part of 
+        the aa string
+
+    Returns
+    -------
+    list
+        aa sequences
+    """
+
+    return [p[0:m] + p[-n:] for p in peplist]
 
